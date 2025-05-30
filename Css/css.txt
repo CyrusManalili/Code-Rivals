@@ -1,0 +1,207 @@
+<!DOCTYPE HTML>
+	<html>
+	//css
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: radial-gradient(circle at center, #001f3f, #000);
+    font-family: 'Orbitron', sans-serif;
+    color: #00ccff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  h1 {
+    text-shadow: 0 0 10px #00ccff;
+    margin: 20px 0 10px;
+    font-size: 32px;
+  }
+
+  .game-container {
+    position: relative;
+    width: 800px;
+    height: 600px;
+    border: 2px solid #00ccff;
+    border-radius: 20px;
+    box-shadow: 0 0 30px #00ccff inset;
+    background-color: rgba(0, 0, 50, 0.9);
+    overflow: hidden;
+    margin-top: 10px;
+  }
+
+  #logoutBtn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 8px 16px;
+    background-color: #001f3f;
+    border: 2px solid #00ccff;
+    color: #00ccff;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 10px #00ccff;
+    z-index: 10;
+    border-radius: 8px;
+  }
+
+  .player-circle {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .player {
+    position: absolute;
+    width: 100px;
+    text-align: center;
+    transform: translate(-50%, -50%);
+  }
+
+  .player .name {
+    font-weight: bold;
+    font-size: 16px;
+  }
+
+  .player .name.active {
+    color: yellow;
+    text-shadow: 0 0 10px yellow;
+  }
+
+  .player .name.correct {
+    color: lime;
+    text-shadow: 0 0 10px lime;
+  }
+
+  .player .name.wrong {
+    color: red;
+    text-shadow: 0 0 10px red;
+  }
+
+  .player .lives {
+    font-size: 12px;
+  }
+
+  #timer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 48px;
+    text-shadow: 0 0 10px #00ccff;
+  }
+
+  #questionBox {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0,0,50,0.7);
+    padding: 20px;
+    border: 2px solid #00ccff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #00ccff;
+    width: 70%;
+    text-align: center;
+  }
+
+  #questionBox input[type="text"] {
+    padding: 10px;
+    font-size: 16px;
+    width: 60%;
+    background-color: black;
+    color: #00ccff;
+    border: 1px solid #00ccff;
+    border-radius: 5px;
+    margin-right: 10px;
+  }
+
+  #questionBox button {
+    padding: 10px 20px;
+    background-color: #001f3f;
+    border: 2px solid #00ccff;
+    color: #00ccff;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 10px #00ccff;
+    border-radius: 5px;
+  }
+
+  .replay-button {
+    margin-top: 20px;
+    display: none;
+  }
+
+  #leaderboard, #globalLeaderboard {
+    margin-top: 20px;
+    width: 800px;
+    background-color: rgba(0,0,0,0.85);
+    border: 3px solid #00ccff;
+    border-radius: 20px;
+    padding: 10px;
+    color: #00ccff;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 0 15px #00ccff;
+  }
+
+  #leaderboard table, #globalLeaderboard table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Orbitron', sans-serif;
+  }
+
+  #leaderboard th, #leaderboard td, #globalLeaderboard th, #globalLeaderboard td {
+    padding: 12px 10px;
+    border: 1px solid #00ccff;
+  }
+
+  #leaderboard thead, #globalLeaderboard thead {
+    background-color: #000;
+    color: #00ccff;
+    font-size: 18px;
+    text-shadow: 0 0 5px #00ccff;
+  }
+
+  #leaderboard tbody tr:nth-child(odd), #globalLeaderboard tbody tr:nth-child(odd) {
+    background-color: rgba(0, 0, 50, 0.6);
+  }
+
+  #leaderboard tbody tr:nth-child(even), #globalLeaderboard tbody tr:nth-child(even) {
+    background-color: rgba(0, 0, 100, 0.4);
+  }
+
+  #leaderboard tbody td, #globalLeaderboard tbody td {
+    font-size: 16px;
+  }
+
+  #loginContainer {
+    background-color: rgba(0,0,50,0.9);
+    border: 2px solid #00ccff;
+    border-radius: 20px;
+    padding: 20px;
+    width: 400px;
+    text-align: center;
+    box-shadow: 0 0 20px #00ccff;
+    margin-top: 50px;
+  }
+  #loginContainer input {
+    margin: 10px 0;
+  }
+
+  #gameUI {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+  }
+</style>
+
+	</html>

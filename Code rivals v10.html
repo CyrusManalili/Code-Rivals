@@ -1,0 +1,1905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Code Rivals - C++ Challenge</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: radial-gradient(circle at center, #001f3f, #000);
+    font-family: 'Orbitron', sans-serif;
+    color: #00ccff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh; /* Maximize height */
+    width: 100vw; /* Maximize width */
+    overflow: hidden; /* Prevent body scrollbars from main content */
+  }
+
+  h1 {
+    text-shadow: 0 0 10px #00ccff;
+    margin: 20px 0 10px;
+    font-size: 32px;
+  }
+
+  .game-container {
+    position: relative;
+    width: 900px; /* Increased width */
+    height: 650px; /* Increased height */
+    border: 2px solid #00ccff;
+    border-radius: 20px;
+    box-shadow: 0 0 30px #00ccff inset;
+    background-color: rgba(0, 0, 50, 0.9);
+    overflow: hidden;
+    margin-top: 10px;
+  }
+
+  /* Shared button style for back button */
+  #backToLobbyBtn, #soloBackToLobbyBtn, .back-to-mode-selection-btn {
+    position: absolute;
+    padding: 8px 16px;
+    background-color: #001f3f;
+    border: 2px solid #00ccff;
+    color: #00ccff;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 10px #00ccff;
+    z-index: 10;
+    border-radius: 8px;
+    top: 10px;
+    left: 10px; /* Positioned on the left side */
+  }
+
+  .player-circle {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .player {
+    position: absolute;
+    width: 100px;
+    text-align: center;
+    transform: translate(-50%, -50%);
+  }
+
+  .player .name {
+    font-weight: bold;
+    font-size: 16px;
+  }
+
+  .player .name.active {
+    color: yellow;
+    text-shadow: 0 0 10px yellow;
+  }
+
+  .player .name.correct {
+    color: lime;
+    text-shadow: 0 0 10px lime;
+  }
+
+  .player .name.wrong {
+    color: red;
+    text-shadow: 0 0 10px red;
+  }
+
+  .player .lives {
+    font-size: 12px;
+  }
+
+  #timer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 48px;
+    text-shadow: 0 0 10px #00ccff;
+  }
+
+  #questionBox {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0,0,50,0.7);
+    padding: 20px;
+    border: 2px solid #00ccff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #00ccff;
+    width: 70%;
+    text-align: center;
+  }
+
+  #questionBox input[type="text"] {
+    padding: 10px;
+    font-size: 16px;
+    width: 60%;
+    background-color: black;
+    color: #00ccff;
+    border: 1px solid #00ccff;
+    border-radius: 5px;
+    margin-right: 10px;
+  }
+
+  #questionBox button {
+    padding: 10px 20px;
+    background-color: #001f3f;
+    border: 2px solid #00ccff;
+    color: #00ccff;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 10px #00ccff;
+    border-radius: 5px;
+  }
+
+  .replay-button {
+    margin-top: 20px;
+    display: none;
+  }
+
+  #leaderboard, #globalLeaderboard {
+    margin-top: 20px;
+    width: 95%; /* Expanded width */
+    background-color: rgba(0,0,0,0.85);
+    border: 3px solid #00ccff;
+    border-radius: 20px;
+    padding: 10px;
+    color: #00ccff;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 0 15px #00ccff;
+    /* Removed max-height and overflow-y for a larger, non-scrolling area */
+    height: auto; /* Let content dictate height */
+  }
+
+  #leaderboard table, #globalLeaderboard table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Orbitron', sans-serif;
+  }
+
+  #leaderboard th, #leaderboard td, #globalLeaderboard th, #globalLeaderboard td {
+    padding: 12px 10px;
+    border: 1px solid #00ccff;
+  }
+
+  #leaderboard thead, #globalLeaderboard thead {
+    background-color: #000;
+    color: #00ccff;
+    font-size: 18px;
+    text-shadow: 0 0 5px #00ccff;
+  }
+
+  #leaderboard tbody tr:nth-child(odd), #globalLeaderboard tbody tr:nth-child(odd) {
+    background-color: rgba(0, 0, 50, 0.6);
+  }
+
+  #leaderboard tbody tr:nth-child(even), #globalLeaderboard tbody tr:nth-child(even) {
+    background-color: rgba(0, 0, 100, 0.4);
+  }
+
+  #leaderboard tbody td, #globalLeaderboard tbody td {
+    font-size: 16px;
+  }
+
+  /* Styles for Game Mode Selection */
+  #gameModeSelection {
+    display: none; /* Hidden by default, shown after login */
+    background-color: rgba(0,0,50,0.9);
+    border: 2px solid #00ccff;
+    border-radius: 20px;
+    padding: 20px;
+    width: 600px;
+    text-align: center;
+    box-shadow: 0 0 20px #00ccff;
+    margin-top: 50px;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .game-mode-box {
+    flex: 1;
+    background-color: #001f3f;
+    border: 2px solid #00ccff;
+    border-radius: 15px;
+    padding: 30px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .game-mode-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 25px #00ccff;
+  }
+
+  .game-mode-box h3 {
+    margin-top: 0;
+    color: #00ccff;
+    text-shadow: 0 0 8px #00ccff;
+  }
+
+
+  #gameUI {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+    flex-grow: 1; /* Allow gameUI to grow vertically */
+  }
+
+  /* New styles for chat box */
+  .main-content-wrapper {
+    display: none; /* Hidden by default, shown when gameUI is active */
+    gap: 20px; /* Space between game UI and chat */
+    width: fit-content; /* Adjust width to fit content */
+    justify-content: center;
+    align-items: stretch; /* Stretch items to fill height */
+    flex-grow: 1; /* Allow wrapper to grow */
+    height: 80vh; /* Occupy significant vertical space */
+  }
+
+  #chatBox {
+    background-color: rgba(0, 0, 50, 0.9);
+    border: 2px solid #00ccff;
+    border-radius: 10px;
+    box-shadow: 0 0 20px #00ccff;
+    width: 300px; /* Fixed width for chat */
+    height: 100%; /* Match game container height */
+    margin-top: 10px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #chatMessages {
+    flex-grow: 1;
+    overflow-y: auto;
+    border: 1px solid #00ccff;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #00ccff;
+    font-size: 14px;
+    word-wrap: break-word; /* Ensure long words wrap */
+  }
+
+  #chatInput {
+    padding: 8px;
+    font-size: 14px;
+    background-color: black;
+    color: #00ccff;
+    border: 1px solid #00ccff;
+    border-radius: 5px;
+    width: calc(100% - 16px); /* Account for padding */
+    margin-bottom: 5px;
+  }
+
+  #sendChatBtn {
+    padding: 8px 15px;
+    background-color: #001f3f;
+    border: 2px solid #00ccff;
+    color: #00ccff;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 10px #00ccff;
+    border-radius: 5px;
+    width: 100%;
+  }
+
+  /* Solo Challenge UI Styles */
+  #soloChallengeUI {
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(0,0,50,0.9);
+    border: 2px solid #00ccff;
+    border-radius: 20px;
+    box-shadow: 0 0 30px #00ccff inset;
+    padding: 20px;
+    width: 900px; /* Same width as game-container for consistency */
+    height: 650px; /* Adjusted height for content */
+    margin-top: 10px;
+    position: relative;
+    flex-grow: 1;
+  }
+
+  #soloChallengeUI h2 {
+    color: #00ccff;
+    text-shadow: 0 0 8px #00ccff;
+    margin-top: 0;
+  }
+
+  #soloProblemDescription {
+    background-color: rgba(0,0,0,0.7);
+    border: 1px solid #00ccff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    width: calc(100% - 30px);
+    min-height: 80px;
+    overflow-y: auto;
+    font-size: 16px;
+  }
+
+  #soloCodeEditor {
+    width: calc(100% - 20px);
+    height: 200px;
+    background-color: #000;
+    color: #00ff00; /* Green text for code editor */
+    border: 1px solid #00ccff;
+    border-radius: 5px;
+    padding: 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    resize: vertical; /* Allow vertical resizing */
+    margin-bottom: 15px;
+  }
+
+  #soloChallengeButtons {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+
+  #soloChallengeButtons button {
+    padding: 12px 25px;
+    background-color: #001f3f;
+    border: 2px solid #00ccff;
+    color: #00ccff;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 10px #00ccff;
+    border-radius: 8px;
+    transition: background-color 0.2s, box-shadow 0.2s;
+  }
+
+  #soloChallengeButtons button:hover:not(:disabled) {
+    background-color: #003f6f;
+    box-shadow: 0 0 15px #00ff00;
+  }
+
+  #soloChallengeButtons button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  #soloLoadingIndicator {
+      display: none; /* Hidden by default */
+      text-align: center;
+      margin-top: 10px;
+      font-size: 18px;
+      color: yellow;
+  }
+
+  #soloResult {
+    background-color: rgba(0,0,0,0.7);
+    border: 1px solid #00ccff;
+    border-radius: 8px;
+    padding: 15px;
+    width: calc(100% - 30px);
+    min-height: 80px;
+    overflow-y: auto;
+    font-size: 14px;
+    white-space: pre-wrap; /* Preserve whitespace and wrap text */
+  }
+
+
+  /* Custom Modal for Alerts */
+  .custom-modal {
+      display: none; /* Hidden by default */
+      position: fixed; /* Stay in place */
+      z-index: 20; /* Sit on top */
+      left: 0;
+      top: 0;
+      width: 100%; /* Full width */
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+  }
+
+  .custom-modal-content {
+      background-color: rgba(0,0,50,0.95);
+      margin: auto;
+      padding: 30px;
+      border: 3px solid #00ccff;
+      border-radius: 15px;
+      width: 80%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 0 25px #00ccff;
+      transform: scale(0.95);
+      animation: modalFadeIn 0.3s forwards;
+      color: #fff;
+  }
+
+  .custom-modal-content h3 {
+      color: #00ccff;
+      text-shadow: 0 0 10px #00ccff;
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 24px;
+  }
+
+  .custom-modal-content p {
+      font-size: 16px;
+      margin-bottom: 25px;
+      line-height: 1.5;
+  }
+
+  .custom-modal-content button {
+      background-color: #001f3f;
+      border: 2px solid #00ccff;
+      color: #00ccff;
+      padding: 10px 25px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 0 10px #00ccff;
+      transition: background-color 0.2s, box-shadow 0.2s;
+  }
+
+  .custom-modal-content button:hover {
+      background-color: #003f6f;
+      box-shadow: 0 0 15px #00ff00;
+  }
+
+  @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+  }
+
+  /* Login/Signup Forms */
+  #authContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0,0,50,0.9);
+    border: 2px solid #00ccff;
+    border-radius: 20px;
+    padding: 30px;
+    width: 400px;
+    text-align: center;
+    box-shadow: 0 0 25px #00ccff;
+    margin-top: 50px;
+  }
+
+  #authContainer h2 {
+    color: #00ccff;
+    text-shadow: 0 0 8px #00ccff;
+    margin-top: 0;
+    margin-bottom: 25px;
+  }
+
+  #authContainer input[type="text"],
+  #authContainer input[type="password"] {
+    width: calc(100% - 20px);
+    padding: 12px;
+    margin-bottom: 15px;
+    background-color: black;
+    color: #00ccff;
+    border: 1px solid #00ccff;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+
+  #authContainer button {
+    width: 100%;
+    padding: 12px;
+    background-color: #001f3f;
+    border: 2px solid #00ccff;
+    color: #00ccff;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 10px #00ccff;
+    border-radius: 8px;
+    font-size: 18px;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    margin-bottom: 10px;
+  }
+
+  #authContainer button:hover {
+    background-color: #003f6f;
+    box-shadow: 0 0 15px #00ff00;
+  }
+
+  #authSwitch {
+    color: #00ccff;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 15px;
+  }
+
+  /* Logout Button in Main UI (will be shown after login) */
+  #logoutBtn {
+      position: absolute; /* Or relative to its container, depends on layout */
+      top: 10px; /* Adjust as needed */
+      right: 10px; /* Adjust as needed */
+      padding: 8px 16px;
+      background-color: #a00000; /* Red color for logout */
+      border: 2px solid #ff0000;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 10px #ff0000;
+      z-index: 10;
+      border-radius: 8px;
+      display: none; /* Hidden by default */
+  }
+
+  #welcomeMessage {
+      color: #fff;
+      font-size: 18px;
+      margin-top: 10px;
+      display: none; /* Hidden by default */
+  }
+
+  /* New Lobby Styles */
+  .lobby-list-container {
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(0,0,50,0.9);
+    border: 2px solid #00ccff;
+    border-radius: 20px;
+    padding: 20px;
+    width: 800px;
+    text-align: center;
+    box-shadow: 0 0 20px #00ccff;
+    margin-top: 50px;
+    overflow-y: auto; /* Allow scrolling if many lobbies */
+    max-height: 80vh; /* Limit height */
+  }
+
+  .lobby-list-container h2 {
+    color: #00ccff;
+    text-shadow: 0 0 8px #00ccff;
+    margin-top: 0;
+    margin-bottom: 20px;
+  }
+
+  .lobby-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    width: 100%;
+    padding: 10px;
+  }
+
+  .lobby-card {
+    background-color: #001f3f;
+    border: 2px solid #00ccff;
+    border-radius: 15px;
+    padding: 20px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 120px; /* Fixed height for consistent look */
+  }
+
+  .lobby-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 25px #00ccff;
+  }
+
+  .lobby-card h3 {
+    margin: 0 0 10px 0;
+    color: #00ccff;
+    text-shadow: 0 0 5px #00ccff;
+    font-size: 1.2em;
+  }
+
+  .lobby-card p {
+    margin: 5px 0;
+    font-size: 0.9em;
+  }
+
+  .lobby-card .join-btn {
+    padding: 8px 15px;
+    background-color: #004d40; /* Darker green for join */
+    border: 2px solid #00ccff;
+    color: #00ccff;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 10px #00ccff;
+    border-radius: 8px;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    margin-top: 10px;
+    align-self: flex-end; /* Align to bottom right */
+  }
+
+  .lobby-card .join-btn:hover {
+    background-color: #00645a;
+    box-shadow: 0 0 15px #00ff00;
+  }
+
+  .lobby-card.full {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background-color: #333;
+  }
+
+  .lobby-card.full .join-btn {
+    background-color: #666;
+    border-color: #999;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .lobby-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .lobby-header button {
+    position: relative; /* Override absolute positioning for this button */
+    top: auto;
+    left: auto;
+    margin-right: 10px; /* Space from the edge */
+  }
+
+  #startGameButton {
+    padding: 12px 25px;
+    background-color: #008000; /* Green for start game */
+    border: 2px solid #00ff00;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 10px #00ff00;
+    border-radius: 8px;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    margin-top: 20px;
+  }
+
+  #startGameButton:hover:not(:disabled) {
+    background-color: #00b300;
+    box-shadow: 0 0 15px #00ff00;
+  }
+
+  #startGameButton:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    background-color: #555;
+    border-color: #888;
+    box-shadow: none;
+  }
+
+  #currentLobbyInfo {
+    margin-top: 10px;
+    font-size: 1.1em;
+    color: #fff;
+    text-shadow: 0 0 5px #00ccff;
+    display: none; /* Hidden by default */
+  }
+</style>
+</head>
+<body>
+<h1>Code Rivals</h1>
+
+<button id="logoutBtn" onclick="logout()">Logout</button>
+<div id="welcomeMessage"></div>
+
+<div id="authContainer">
+  <h2 id="authTitle">Login</h2>
+  <input type="text" id="usernameInput" placeholder="Username" autocomplete="username">
+  <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password">
+  <button id="authSubmitBtn" onclick="login()">Login</button>
+  <div id="authSwitch" onclick="toggleAuthMode()">Don't have an account? Sign Up</div>
+</div>
+
+
+<div id="gameModeSelection">
+  <h2>Choose Your Game Mode</h2>
+  <div class="game-mode-box" onclick="showLobbyList('4v4-qna')">
+    <h3>4v4 Q&A</h3>
+    <p>Compete with up to 4 players in a fast-paced Q&A challenge.</p>
+  </div>
+  <div class="game-mode-box" onclick="showLobbyList('1v1-fill-in-blanks')">
+    <h3>1v1 Fill in the Blanks</h3>
+    <p>A head-to-head battle, filling in missing code for C++ beginners.</p>
+  </div>
+  <div class="game-mode-box" onclick="selectGameMode('solo-coding-challenge')">
+    <h3>Solo Coding Challenge</h3>
+    <p>Improve your skills by solving C++ problems, evaluated by AI.</p>
+  </div>
+</div>
+
+<!-- New Lobby List Container -->
+<div id="lobbyListContainer" class="lobby-list-container">
+  <div class="lobby-header">
+    <button class="back-to-mode-selection-btn" onclick="backToModeSelection()">Back to Mode Select</button>
+    <h2 id="lobbyListTitle"></h2>
+  </div>
+  <div id="lobbiesGrid" class="lobby-grid">
+    <!-- Lobbies will be dynamically loaded here -->
+  </div>
+</div>
+
+<!-- Single Lobby View -->
+<div id="singleLobbyView" class="lobby-list-container">
+  <div class="lobby-header">
+    <button class="back-to-mode-selection-btn" onclick="backToLobbyList()">Back to Lobbies</button>
+    <h2 id="currentLobbyTitle"></h2>
+  </div>
+  <p id="currentLobbyInfo"></p>
+  <div id="lobbyPlayersDisplay" class="lobby-grid">
+    <!-- Players in the current lobby will be displayed here -->
+  </div>
+  <button id="startGameButton" onclick="startGame()" disabled>Start Game</button>
+</div>
+
+
+<div class="main-content-wrapper">
+    <div id="gameUI">
+      <div class="game-container">
+        <button id="backToLobbyBtn" onclick="backToLobby()">Back to Lobbies</button>
+        <div class="player-circle" id="playerCircle"></div>
+        <div id="timer">30</div>
+        <div id="questionBox">
+          <p id="question">Loading...</p>
+          <input type="text" id="answerInput" placeholder="Your answer here" />
+          <button id="submitAnswerBtn" onclick="submitAnswer()">Submit</button>
+        </div>
+      </div>
+
+      <div id="leaderboard">
+        <h2>Current Round Leaderboard</h2>
+        <table>
+          <thead>
+            <tr><th>Rank</th><th>Player</th><th>ELO</th><th>Accuracy</th></tr>
+          </thead>
+          <tbody id="leaderboardBody"></tbody>
+        </table>
+      </div>
+
+      <div id="globalLeaderboard">
+        <h2>Global Leaderboard (All Players)</h2>
+        <table>
+          <thead>
+            <tr><th>Rank</th><th>Player</th><th>ELO</th><th>Accuracy</th></tr>
+          </thead>
+          <tbody id="globalLeaderboardBody"></tbody>
+        </table>
+      </div>
+      <div class="replay-button" id="replayButton">
+        <button onclick="replayGame()">Replay</button>
+      </div>
+    </div>
+
+    <div id="soloChallengeUI">
+        <button id="soloBackToLobbyBtn" onclick="backToLobby()">Back to Lobbies</button>
+        <h2>Solo Coding Challenge - Stage <span id="soloCurrentStage">1</span></h2>
+        <div id="soloProblemDescription"></div>
+        <textarea id="soloCodeEditor" placeholder="Write your C++ code here..."></textarea>
+        <div id="soloChallengeButtons">
+            <button id="soloPrevStageBtn" onclick="previousSoloStage()" disabled>Previous Stage</button>
+            <button onclick="submitSoloCode()">Run Code</button>
+            <button id="soloNextStageBtn" onclick="nextSoloStage()" disabled>Next Stage</button>
+        </div>
+        <div id="soloLoadingIndicator">Evaluating code...</div>
+        <div id="soloResult"></div>
+    </div>
+
+
+    <div id="chatBox">
+        <h3>Lobby Chat</h3>
+        <div id="chatMessages"></div>
+        <input type="text" id="chatInput" placeholder="Type your message..." />
+        <button id="sendChatBtn" onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<div id="customModal" class="custom-modal">
+    <div class="custom-modal-content">
+        <h3 id="modalTitle"></h3>
+        <p id="modalMessage"></p>
+        <button onclick="closeModal()">OK</button>
+    </div>
+</div>
+
+<script>
+  // Current user's session data - NOT PERSISTENT without a backend
+  // soloStage is the only persistent progress across sessions/game modes for the user
+  let currentUser = null; 
+
+  // Simulated "database" for user credentials (in-memory, no persistence on refresh)
+  // In a real app, this would be a backend database.
+  // Stores { username: "password", soloStage: 0, correctAnswers: 0, totalAnswers: 0, elo: 0 }
+  // WARNING: THIS IS NOT SECURE OR PERSISTENT FOR A REAL APPLICATION.
+  const users = {}; 
+
+  let players = []; // Stores current game's player objects
+  let currentGameMode = '';
+  let currentLobbyType = ''; // '4v4-qna', '1v1-fill-in-blanks', 'solo-coding-challenge'
+  let currentLobbyId = ''; // e.g., '4v4lobby1'
+
+  // Simulated Lobbies (Client-side only, not shared across users)
+  // These represent the *types* of lobbies available, not live rooms.
+  // Real lobbies would need a backend to manage players, fullness, etc.
+  const simulatedLobbies = {
+      '4v4-qna': {
+          prefix: '4v4 Lobby',
+          maxPlayers: 4,
+          count: 3 // Simulate 3 available 4v4 lobbies
+      },
+      '1v1-fill-in-blanks': {
+          prefix: '1v1 Lobby',
+          maxPlayers: 2,
+          count: 5 // Simulate 5 available 1v1 lobbies
+      },
+      'solo-coding-challenge': {
+          prefix: 'Solo Challenge',
+          maxPlayers: 1, // Only 1 player per solo lobby
+          count: 1 // Only one solo "lobby" instance needed per user's session
+      }
+  };
+
+
+  // API Key for Gemini.
+  // WARNING: Placing API keys directly in client-side code is a SECURITY RISK.
+  // For a production application, you should use a backend server to proxy requests
+  // to the Gemini API to keep your API key secure.
+  const API_KEY = "AIzaSyA5NgYegSNZz95wbNtCKI9GnloKCcZQAw"; 
+  const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+
+
+  const originalQuestions = [
+    { q: "What is the output of: cout << 2 + 2;", a: "4" },
+    { q: "Which keyword is used for constant?", a: "const" },
+    { q: "How many bytes is an int?", a: "4" },
+    { q: "C++ pointer access operator?", a: "->" },
+    { q: "Declare a pointer to int", a: "int* ptr;" }
+  ];
+
+  const fillInBlanksQuestions = [
+    { q: "int main() { cout << \"Hello, ___\"; return 0; }", a: "world", hint: "Common greeting" },
+    { q: "int ___ = 10;", a: "x", hint: "A common variable name" },
+    { q: "for (int i = 0; i < ___; i++)", a: "10", hint: "A typical loop limit" },
+    { q: "class MyClass { public: MyClass() { /* constructor */ } };", a: "MyClass", hint: "Name of the class" },
+    { q: "std::string ___ = \"C++\";", a: "language", hint: "What is C++?" }
+  ];
+
+  // Solo Coding Challenges
+  const soloChallenges = [
+    {
+      stage: 1,
+      title: "Hello World!",
+      problem: "Write a C++ program that prints 'Hello, World!' to the console. The output must exactly match 'Hello, World!' followed by a newline.",
+      expectedOutput: "Hello, World!\n",
+      initialCode: `#include <iostream>
+
+int main() {
+  // Your code here
+  return 0;
+}`
+    },
+    {
+      stage: 2,
+      title: "Add Two Numbers",
+      problem: "Write a C++ program that declares two integer variables, `a` and `b`, initializes them to 5 and 7 respectively, and prints their sum to the console. The output must be exactly '12' followed by a newline.",
+      expectedOutput: "12\n",
+      initialCode: `#include <iostream>
+
+int main() {
+  int a = 5;
+  int b = 7;
+  // Your code here
+  std::cout << (a + b) << std::endl; 
+  return 0;
+}`
+    },
+    {
+      stage: 3,
+      title: "Conditional Statement (If-Else)",
+      problem: "Write a C++ program that declares an integer variable `num` and initializes it to 10. If `num` is greater than 5, print 'Greater than 5'; otherwise, print 'Not greater than 5'. The output must be exactly 'Greater than 5' followed by a newline.",
+      expectedOutput: "Greater than 5\n",
+      initialCode: `#include <iostream>
+
+int main() {
+  int num = 10;
+  // Your if-else statement here
+  if (num > 5) { 
+    std::cout << "Greater than 5" << std::endl;
+  } else {
+    std::cout << "Not greater than 5" << std::endl;
+  }
+  return 0;
+}`
+    },
+    {
+      stage: 4,
+      title: "Simple Loop (For loop)",
+      problem: "Write a C++ program that uses a for loop to print numbers from 1 to 3, each on a new line. The output must be exactly '1\\n2\\n3\\n'.",
+      expectedOutput: "1\n2\n3\n",
+      initialCode: `#include <iostream>
+
+int main() {
+  // Your for loop here
+  for (int i = 1; i <= 3; ++i) {
+    std::cout << i << std::endl;
+  }
+  return 0;
+}`
+    },
+    {
+      stage: 5,
+      title: "Basic Function",
+      problem: "Write a C++ program with a function named `add` that takes two integers as parameters and returns their sum. In `main`, call `add` with 15 and 20 and print the result. The output must be exactly '35' followed by a newline.",
+      expectedOutput: "35\n",
+      initialCode: `#include <iostream>
+
+// Your add function here
+int add(int a, int b) {
+  return a + b;
+}
+
+int main() {
+  // Call your function and print the result
+  std::cout << add(15, 20) << std::endl;
+  return 0;
+}`
+    },
+    {
+      stage: 6,
+      title: "Factorial Calculation",
+      problem: "Write a C++ program to calculate the factorial of a number (e.g., 5). Print the result. The output must be exactly '120' followed by a newline. (Factorial of 5 is 5*4*3*2*1 = 120)",
+      expectedOutput: "120\n",
+      initialCode: `#include <iostream>
+
+int main() {
+  int n = 5;
+  long long factorial = 1; // Use long long for larger factorials
+
+  // Calculate factorial
+  for (int i = 1; i <= n; ++i) {
+    factorial *= i;
+  }
+
+  std::cout << factorial << std::endl;
+  return 0;
+}`
+    },
+    {
+      stage: 7,
+      title: "Array Sum",
+      problem: "Write a C++ program that initializes an integer array with values {10, 20, 30}. Calculate the sum of its elements and print the sum. The output must be exactly '60' followed by a newline.",
+      expectedOutput: "60\n",
+      initialCode: `#include <iostream>
+#include <vector> // Using vector is often preferred in modern C++
+
+int main() {
+  // Using a C-style array:
+  // int arr[] = {10, 20, 30};
+
+  // Or using std::vector:
+  std::vector<int> numbers = {10, 20, 30};
+  int sum = 0;
+
+  // Calculate sum
+  for (int num : numbers) {
+    sum += num;
+  }
+
+  std::cout << sum << std::endl;
+  return 0;
+}`
+    }
+  ];
+
+
+  let questions = []; // Used for Q&A and Fill-in-the-blanks
+  let currentQuestionIndex = 0;
+  let currentPlayerIndex = 0;
+  let timeLeft = 30;
+  let timer;
+
+  let currentSoloStage = 0; // Index for soloChallenges array - will be loaded from currentUser.soloStage
+
+  // --- Utility Functions ---
+
+  // Custom Modal Functions
+  function showCustomModal(title, message) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalMessage').textContent = message;
+      document.getElementById('customModal').style.display = 'flex';
+  }
+
+  function closeModal() {
+      document.getElementById('customModal').style.display = 'none';
+  }
+
+  // --- Authentication Functions (Client-side ONLY - No persistence) ---
+  let isLoginMode = true; // true for login, false for signup
+
+  function toggleAuthMode() {
+    isLoginMode = !isLoginMode;
+    const authTitle = document.getElementById('authTitle');
+    const authSubmitBtn = document.getElementById('authSubmitBtn');
+    const authSwitch = document.getElementById('authSwitch');
+
+    if (isLoginMode) {
+      authTitle.textContent = "Login";
+      authSubmitBtn.textContent = "Login";
+      authSubmitBtn.onclick = login;
+      authSwitch.textContent = "Don't have an account? Sign Up";
+    } else {
+      authTitle.textContent = "Sign Up";
+      authSubmitBtn.textContent = "Sign Up";
+      authSubmitBtn.onclick = signup;
+      authSwitch.textContent = "Already have an account? Login";
+    }
+  }
+
+  function signup() {
+    const username = document.getElementById('usernameInput').value.trim();
+    const password = document.getElementById('passwordInput').value.trim();
+
+    if (!username || !password) {
+      showCustomModal("Error", "Username and password cannot be empty.");
+      return;
+    }
+
+    if (users[username]) {
+      showCustomModal("Error", "Username already exists. Please choose a different one.");
+      return;
+    }
+
+    // Simulate saving to "database" (in-memory only)
+    users[username] = { password: password, soloStage: 0, correctAnswers: 0, totalAnswers: 0, elo: 0 }; // Store password, initial solo stage, and new accuracy stats
+    showCustomModal("Success", `Account for "${username}" created! Please login.`);
+    // Automatically switch to login mode after successful signup
+    toggleAuthMode();
+    document.getElementById('usernameInput').value = username; // Pre-fill username
+    document.getElementById('passwordInput').value = ''; // Clear password field
+  }
+
+  function login() {
+    const username = document.getElementById('usernameInput').value.trim();
+    const password = document.getElementById('passwordInput').value.trim();
+
+    if (!username || !password) {
+      showCustomModal("Error", "Please enter username and password.");
+      return;
+    }
+
+    if (users[username] && users[username].password === password) {
+      // Load user data including soloStage and accuracy stats
+      currentUser = { 
+        username: username, 
+        lives: 3, // These will be reset per game mode, but good to have a default
+        elo: users[username].elo || 0, // Load global ELO
+        soloStage: users[username].soloStage || 0,
+        correctAnswers: users[username].correctAnswers || 0, 
+        totalAnswers: users[username].totalAnswers || 0 
+      }; 
+      showCustomModal("Success", `Welcome, ${username}!`);
+      document.getElementById('authContainer').style.display = 'none';
+      document.getElementById('gameModeSelection').style.display = 'flex';
+      document.getElementById('logoutBtn').style.display = 'block'; // Show logout button
+      document.getElementById('welcomeMessage').textContent = `Logged in as: ${currentUser.username}`;
+      document.getElementById('welcomeMessage').style.display = 'block';
+      updateGlobalLeaderboard(); // Update global leaderboard on login
+    } else {
+      showCustomModal("Error", "Invalid username or password.");
+    }
+  }
+
+  function logout() {
+    // Before logging out, save currentSoloStage and accuracy stats back to simulated users DB
+    if (currentUser) {
+        users[currentUser.username].soloStage = currentUser.soloStage;
+        users[currentUser.username].correctAnswers = currentUser.correctAnswers;
+        users[currentUser.username].totalAnswers = currentUser.totalAnswers;
+        users[currentUser.username].elo = currentUser.elo; // Save global ELO
+    }
+
+    currentUser = null; // Clear current user session
+    if (timer) clearInterval(timer); // Stop any active game timer
+
+    // Hide game elements and show login
+    document.getElementById('gameModeSelection').style.display = 'none';
+    document.querySelector('.main-content-wrapper').style.display = 'none';
+    document.getElementById('gameUI').style.display = 'none';
+    document.getElementById('soloChallengeUI').style.display = 'none';
+    document.getElementById('chatBox').style.display = 'none';
+    document.getElementById('lobbyListContainer').style.display = 'none'; // Hide lobby list
+    document.getElementById('singleLobbyView').style.display = 'none'; // Hide single lobby view
+
+    document.getElementById('logoutBtn').style.display = 'none';
+    document.getElementById('welcomeMessage').style.display = 'none';
+
+    // Show authentication container
+    document.getElementById('authContainer').style.display = 'flex';
+    document.getElementById('usernameInput').value = '';
+    document.getElementById('passwordInput').value = '';
+    showCustomModal("Logged Out", "You have been logged out.");
+
+    // Reset game state for next login
+    players = [];
+    currentGameMode = '';
+    currentLobbyType = '';
+    currentLobbyId = '';
+    currentQuestionIndex = 0;
+    currentPlayerIndex = 0;
+    timeLeft = 30;
+    currentSoloStage = 0; // Reset this for the next login to ensure it loads from stored user data
+    updateGlobalLeaderboard(); // Update global leaderboard on logout (it will show stored data)
+  }
+
+  // --- Game Mode Selection & Navigation ---
+  function showLobbyList(modeType) {
+    if (!currentUser) {
+        showCustomModal("Access Denied", "Please log in to play.");
+        return;
+    }
+    currentLobbyType = modeType;
+    document.getElementById("gameModeSelection").style.display = "none";
+    document.getElementById("lobbyListContainer").style.display = "flex";
+    document.getElementById("lobbyListTitle").textContent = `${simulatedLobbies[modeType].prefix} Lobbies`;
+    renderLobbyList(modeType);
+  }
+
+  function renderLobbyList(modeType) {
+      const lobbiesGrid = document.getElementById("lobbiesGrid");
+      lobbiesGrid.innerHTML = '';
+      const lobbyConfig = simulatedLobbies[modeType];
+
+      for (let i = 1; i <= lobbyConfig.count; i++) {
+          const lobbyCard = document.createElement('div');
+          lobbyCard.className = 'lobby-card';
+          lobbyCard.id = `lobby-${modeType}-${i}`;
+
+          // All lobbies start with 0 players
+          const currentOccupancy = 0; 
+          const isFull = currentOccupancy >= lobbyConfig.maxPlayers;
+
+          if (isFull) {
+            lobbyCard.classList.add('full');
+          }
+
+          lobbyCard.innerHTML = `
+              <h3>${lobbyConfig.prefix} ${i}</h3>
+              <p>Players: ${currentOccupancy}/${lobbyConfig.maxPlayers}</p>
+              <button class="join-btn" ${isFull ? 'disabled' : ''} onclick="joinLobby('${modeType}', ${i}, ${currentOccupancy}, ${lobbyConfig.maxPlayers})">Join</button>
+          `;
+          lobbiesGrid.appendChild(lobbyCard);
+      }
+  }
+
+  function joinLobby(modeType, lobbyNum, currentOccupancy, maxPlayers) {
+      // Logic for client-side simulation: a lobby is "full" if maxPlayers is reached
+      // In a real multiplayer system, this would be checked on the server
+      if (currentOccupancy >= maxPlayers) {
+          showCustomModal("Lobby Full", "This lobby is currently full. Please choose another.");
+          return;
+      }
+      
+      currentLobbyId = `${modeType}${lobbyNum}`; // e.g., '4v4lobby1'
+      currentGameMode = modeType;
+
+      document.getElementById("lobbyListContainer").style.display = "none";
+      document.getElementById("singleLobbyView").style.display = "flex";
+      document.getElementById("currentLobbyTitle").textContent = `${simulatedLobbies[modeType].prefix} ${lobbyNum}`;
+
+      // Simulate players in the lobby (current user is the only one added)
+      setupSimulatedLobbyPlayers(modeType, lobbyNum);
+  }
+
+  function setupSimulatedLobbyPlayers(modeType, lobbyNum) {
+      const lobbyPlayersDisplay = document.getElementById('lobbyPlayersDisplay');
+      lobbyPlayersDisplay.innerHTML = '';
+      let tempPlayers = [];
+
+      // Current user is the first player to enter
+      tempPlayers.push({ name: currentUser.username, isHuman: true });
+
+      // No bots are added here for any game mode.
+      // The game will start with only the human player (for solo)
+      // For multiplayer (4v4, 1v1), the "Start Game" button will remain disabled
+      // unless you manually add more players to the 'players' array for local testing,
+      // or integrate a backend for actual multiplayer functionality.
+
+      // Store these temporary players in the global `players` array for game logic
+      players = tempPlayers;
+
+      // Display players in the lobby UI
+      players.forEach((p, index) => {
+          const playerCard = document.createElement('div');
+          playerCard.className = 'lobby-card';
+          playerCard.innerHTML = `
+              <h3>${p.name}</h3>
+              <p>${p.isHuman ? 'Human Player' : 'AI Opponent (None)'}</p>
+              <p>Status: Ready</p>
+          `;
+          lobbyPlayersDisplay.appendChild(playerCard);
+      });
+
+      // Update lobby info and start game button
+      const maxPlayers = simulatedLobbies[modeType].maxPlayers;
+      document.getElementById('currentLobbyInfo').textContent = `Players in this lobby: ${players.length}/${maxPlayers}`;
+      document.getElementById('currentLobbyInfo').style.display = 'block';
+
+      const startGameBtn = document.getElementById('startGameButton');
+      if (modeType === 'solo-coding-challenge') {
+          startGameBtn.textContent = 'Start Solo Challenge';
+          startGameBtn.disabled = false; // Solo mode always starts with 1 player
+      } else {
+          startGameBtn.textContent = 'Start Game';
+          // For multiplayer, the button is disabled unless required players are met (simulated client-side)
+          // Since only 'currentUser' is added, it will likely remain disabled for 4v4 and 1v1 unless
+          // you manually populate the 'players' array for testing.
+          startGameBtn.disabled = (players.length < simulatedLobbies[modeType].maxPlayers); 
+      }
+  }
+
+  function backToLobbyList() {
+    if (timer) clearInterval(timer);
+
+    document.getElementById("singleLobbyView").style.display = "none";
+    document.getElementById("lobbyListContainer").style.display = "flex";
+    document.getElementById("currentLobbyInfo").style.display = 'none'; // Hide info
+    document.getElementById("lobbyPlayersDisplay").innerHTML = ''; // Clear player display
+    renderLobbyList(currentLobbyType); // Re-render lobby list
+  }
+
+  function backToModeSelection() {
+    if (timer) clearInterval(timer);
+    document.getElementById("lobbyListContainer").style.display = "none";
+    document.getElementById("gameModeSelection").style.display = "flex";
+  }
+
+
+  function selectGameMode(mode) {
+    if (!currentUser) {
+      showCustomModal("Access Denied", "Please log in to play.");
+      return;
+    }
+
+    currentGameMode = mode; // This is directly for solo mode now
+    document.getElementById("gameModeSelection").style.display = "none";
+    document.querySelector('.main-content-wrapper').style.display = "flex";
+
+    // For solo mode, go directly to it
+    if (currentGameMode === 'solo-coding-challenge') {
+      document.getElementById("gameUI").style.display = "none";
+      document.getElementById("soloChallengeUI").style.display = "flex";
+      document.getElementById("chatBox").style.display = "none"; // Hide chat for solo mode
+      
+      currentSoloStage = currentUser.soloStage; 
+      startSoloChallenge(); // Start solo challenge
+    } else {
+        // This path is for multiplayer games initiated from the lobby
+        document.getElementById("singleLobbyView").style.display = "none";
+        document.getElementById("gameUI").style.display = "flex";
+        document.getElementById("soloChallengeUI").style.display = "none";
+        document.getElementById("chatBox").style.display = "flex"; // Show chat for multiplayer
+        
+        // Reset current user's lives and ELO for a new game mode
+        players.forEach(p => {
+            p.lives = 3;
+            p.elo = 0; // ELO for current game session
+            p.correctAnswers = 0; // Correct answers for this game session
+            p.totalAnswers = 0; // Total answers for this game session
+        });
+
+        startGameInternal(); // Start game logic
+    }
+    updateGlobalLeaderboard(); // Update global leaderboard for any mode
+  }
+
+
+  function backToLobby() {
+    // Stop any ongoing timers/game loops
+    if (timer) clearInterval(timer);
+
+    // Save current user's soloStage and accuracy stats before going back to lobby
+    if (currentUser) {
+        users[currentUser.username].soloStage = currentUser.soloStage;
+        users[currentUser.username].correctAnswers = currentUser.correctAnswers;
+        users[currentUser.username].totalAnswers = currentUser.totalAnswers;
+        users[currentUser.username].elo = currentUser.elo; // Save global ELO
+    }
+
+    // Reset game-specific variables for the current game session
+    players = [];
+    currentQuestionIndex = 0;
+    currentPlayerIndex = 0;
+    timeLeft = 30;
+    // currentSoloStage is NOT reset here, as it's part of currentUser progress (and saved above)
+
+    // Hide all game UIs and show game mode selection
+    document.querySelector('.main-content-wrapper').style.display = "none";
+    document.getElementById("gameUI").style.display = "none";
+    document.getElementById("soloChallengeUI").style.display = "none";
+    document.getElementById("chatBox").style.display = "none"; // Hide chat when in lobby selection
+    
+    // Go back to the specific lobby list for the current game mode
+    document.getElementById("singleLobbyView").style.display = "none";
+    document.getElementById("lobbyListContainer").style.display = "flex";
+    document.getElementById("currentLobbyInfo").style.display = 'none'; // Hide info
+    document.getElementById("lobbyPlayersDisplay").innerHTML = ''; // Clear player display
+    renderLobbyList(currentLobbyType); // Re-render lobby list
+
+    // Clear game-specific UI elements
+    document.getElementById("question").textContent = "Loading...";
+    document.getElementById("answerInput").value = "";
+    document.getElementById("answerInput").disabled = false;
+    document.getElementById("submitAnswerBtn").disabled = false; // Ensure submit button is re-enabled
+    document.getElementById("replayButton").style.display = "none";
+    document.getElementById("leaderboardBody").innerHTML = "";
+
+    // Clear solo challenge UI elements (but preserve currentUser.soloStage)
+    document.getElementById("soloProblemDescription").innerHTML = "";
+    document.getElementById("soloCodeEditor").value = "";
+    document.getElementById("soloResult").textContent = "";
+    document.getElementById("soloLoadingIndicator").style.display = "none";
+    document.getElementById("soloNextStageBtn").disabled = true;
+    document.getElementById("soloPrevStageBtn").disabled = true; // Ensure prev button is reset too
+
+    updateGlobalLeaderboard(); // Update global leaderboard when returning to lobby
+  }
+
+  // --- Multiplayer Game Logic (Q&A / Fill-in-the-Blanks) ---
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+
+  function placePlayers() {
+    const container = document.getElementById("playerCircle");
+    const centerX = container.clientWidth / 2;
+    const centerY = container.clientHeight / 2;
+    const radius = 250; // Increased radius for larger board
+    container.innerHTML = "";
+
+    players.forEach((player, index) => {
+      const angle = (2 * Math.PI / players.length) * index - Math.PI / 2;
+      const x = centerX + radius * Math.cos(angle);
+      const y = centerY + radius * Math.sin(angle);
+
+      const playerDiv = document.createElement("div");
+      playerDiv.className = "player";
+      playerDiv.id = `player${index}`;
+      playerDiv.style.left = `${x}px`;
+      playerDiv.style.top = `${y}px`;
+
+      const nameDiv = document.createElement("div");
+      nameDiv.className = "name";
+      nameDiv.textContent = player.name;
+
+      const livesDiv = document.createElement("div");
+      livesDiv.className = "lives";
+      livesDiv.textContent = `Lives: ${player.lives}`;
+
+      playerDiv.appendChild(nameDiv);
+      playerDiv.appendChild(livesDiv);
+      container.appendChild(playerDiv);
+    });
+  }
+
+  // This function is now called when "Start Game" is clicked from a lobby
+  function startGameInternal() {
+    shuffleArray(questions);
+    currentQuestionIndex = 0;
+    currentPlayerIndex = 0; // Start with the first player
+
+    // Reset game-specific player stats for this game instance
+    players.forEach(p => {
+        p.lives = 3;
+        p.elo = 0; // ELO for current game session
+        p.correctAnswers = 0; // Correct answers for this game session
+        p.totalAnswers = 0; // Total answers for this game session
+    });
+
+    placePlayers();
+    document.getElementById("replayButton").style.display = "none";
+    startRound();
+    updateLeaderboard(); // Initial leaderboard for the game
+  }
+
+
+  function startGame() {
+      // This is the button click handler for starting game from lobby
+      if (currentGameMode === 'solo-coding-challenge') {
+          selectGameMode('solo-coding-challenge'); // Direct to solo
+      } else {
+          // Multiplayer game setup (now done in selectGameMode directly for bots, or via actual lobby players)
+          selectGameMode(currentGameMode); // Continue to the game UI
+      }
+  }
+
+
+  function startRound() {
+    // Check for game end conditions
+    const activePlayers = players.filter(p => p.lives > 0);
+    if (activePlayers.length <= 1 || currentQuestionIndex >= questions.length) {
+      endGame();
+      return;
+    }
+
+    // Advance to the next active player
+    let nextPlayerFound = false;
+    for (let i = 0; i < players.length; i++) {
+        currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+        if (players[currentPlayerIndex].lives > 0) {
+            nextPlayerFound = true;
+            break;
+        }
+    }
+    // If no active player found (shouldn't happen if activePlayers.length > 1), restart from 0
+    if (!nextPlayerFound) {
+        currentPlayerIndex = 0; 
+        while (players[currentPlayerIndex].lives <= 0) {
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+        }
+    }
+
+
+    displayQuestion();
+    timeLeft = 30;
+    document.getElementById("timer").textContent = timeLeft;
+    document.getElementById("answerInput").value = "";
+    document.getElementById("answerInput").disabled = false;
+    document.getElementById("submitAnswerBtn").disabled = false;
+    document.getElementById("answerInput").focus(); // Focus input for user
+
+    // Highlight current player
+    players.forEach((player, index) => {
+      const playerDiv = document.getElementById(`player${index}`);
+      if (playerDiv) {
+        playerDiv.querySelector(".name").classList.remove("active", "correct", "wrong");
+        if (index === currentPlayerIndex) {
+          playerDiv.querySelector(".name").classList.add("active");
+        }
+      }
+    });
+
+    if (timer) clearInterval(timer);
+    timer = setInterval(() => {
+      timeLeft--;
+      document.getElementById("timer").textContent = timeLeft;
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        handleTimeout();
+      }
+    }, 1000);
+  }
+
+  function displayQuestion() {
+    const questionElement = document.getElementById("question");
+    if (currentGameMode === '1v1-fill-in-blanks') {
+      const q = questions[currentQuestionIndex].q;
+      questionElement.innerHTML = `Fill in the blank: <br><code>${q}</code><br><em>Hint: ${questions[currentQuestionIndex].hint}</em>`;
+    } else {
+      questionElement.textContent = questions[currentQuestionIndex].q;
+    }
+  }
+
+  function submitAnswer() {
+    const answerInput = document.getElementById("answerInput");
+    const userAnswer = answerInput.value.trim();
+    const correctAnswer = questions[currentQuestionIndex].a.trim();
+    const currentPlayer = players[currentPlayerIndex]; // Correctly reference the current player
+
+    answerInput.disabled = true;
+    document.getElementById("submitAnswerBtn").disabled = true;
+    clearInterval(timer); // Stop timer immediately after submission
+
+    // Increment total answers for the player
+    currentPlayer.totalAnswers++;
+    if (currentPlayer.name === currentUser.username) {
+        currentUser.totalAnswers++;
+    }
+
+    // *** No AI call here for Q&A / Fill-in-the-blanks ***
+    if (userAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
+      currentPlayer.elo += 10;
+      currentPlayer.correctAnswers++; // Increment correct answers for current game session
+      if (currentPlayer.name === currentUser.username) {
+          currentUser.correctAnswers++; // Increment global correct answers
+          currentUser.elo += 5; // Global ELO gain for correct answer
+      }
+      showFeedback("correct", false, currentPlayer.name); // Pass current player's name
+    } else {
+      currentPlayer.lives--;
+      currentPlayer.elo = Math.max(0, currentPlayer.elo - 5);
+      if (currentPlayer.name === currentUser.username) {
+          currentUser.elo = Math.max(0, currentUser.elo - 2); // Global ELO loss for incorrect answer
+      }
+      showFeedback("wrong", false, currentPlayer.name); // Pass current player's name
+    }
+    updateLeaderboard();
+    updateGlobalLeaderboard(); // Update global leaderboard after each answer
+
+    setTimeout(() => {
+      currentQuestionIndex++;
+      startRound();
+    }, 1500); // Wait a bit before next round
+  }
+
+  function handleTimeout() {
+    const currentPlayer = players[currentPlayerIndex]; // Correctly reference the current player
+    currentPlayer.lives--;
+    currentPlayer.elo = Math.max(0, currentPlayer.elo - 5);
+    
+    currentPlayer.totalAnswers++; // Increment total answers for timeout
+    if (currentPlayer.name === currentUser.username) {
+        currentUser.totalAnswers++; // Increment global total answers
+        currentUser.elo = Math.max(0, currentUser.elo - 2); // Global ELO loss for timeout
+    }
+
+    showFeedback("wrong", true, currentPlayer.name); // Indicate timeout as wrong answer, pass player name
+    updateLeaderboard();
+    updateGlobalLeaderboard(); // Update global leaderboard after timeout
+
+    setTimeout(() => {
+      currentQuestionIndex++;
+      startRound();
+    }, 1500);
+  }
+
+  function showFeedback(type, isTimeout = false, playerName) {
+    // Find the player div by iterating through all players to find the one matching the playerName
+    let playerDiv = null;
+    for (let i = 0; i < players.length; i++) {
+        if (players[i].name === playerName) {
+            playerDiv = document.getElementById(`player${i}`);
+            break;
+        }
+    }
+
+    if (playerDiv) {
+      const nameDiv = playerDiv.querySelector(".name");
+      nameDiv.classList.remove("active"); // Remove active state
+      nameDiv.classList.add(type); // Add correct/wrong class
+
+      // Update lives display immediately
+      const playerObj = players.find(p => p.name === playerName);
+      if (playerObj) { // Ensure playerObj exists
+        playerDiv.querySelector(".lives").textContent = `Lives: ${playerObj.lives}`;
+      }
+
+      if (isTimeout) {
+        showCustomModal("Time's Up!", `${playerName} timed out! The correct answer was "${questions[currentQuestionIndex].a}".`);
+      } else if (type === "correct") {
+        showCustomModal("Correct!", `"${questions[currentQuestionIndex].a}" was correct!`);
+      } else {
+        showCustomModal("Wrong Answer!", `The correct answer was "${questions[currentQuestionIndex].a}".`);
+      }
+    }
+  }
+
+
+  function endGame() {
+    clearInterval(timer);
+    document.getElementById("answerInput").disabled = true;
+    document.getElementById("submitAnswerBtn").disabled = true;
+    document.getElementById("timer").textContent = "Game Over!";
+    document.getElementById("replayButton").style.display = "block";
+
+    const remainingPlayers = players.filter(p => p.lives > 0);
+    if (remainingPlayers.length === 1) {
+      showCustomModal("Game Over", `${remainingPlayers[0].name} wins!`);
+    } else {
+      showCustomModal("Game Over", "No one wins or all players eliminated!");
+    }
+    updateLeaderboard(); // Final update
+    updateGlobalLeaderboard(); // Final update
+  }
+
+  function replayGame() {
+    startGameInternal(); // Call internal game start
+  }
+
+  function updateLeaderboard() {
+    const leaderboardBody = document.getElementById("leaderboardBody");
+    leaderboardBody.innerHTML = "";
+
+    // Sort players by ELO (descending), then by correct answers (descending), then by total answers (ascending for tie-breaking)
+    const sortedPlayers = [...players].sort((a, b) => {
+        if (b.elo !== a.elo) return b.elo - a.elo;
+        if (b.correctAnswers !== a.correctAnswers) return b.correctAnswers - a.correctAnswers;
+        return a.totalAnswers - b.totalAnswers;
+    });
+
+    sortedPlayers.forEach((player, index) => {
+      const row = leaderboardBody.insertRow();
+      const rankCell = row.insertCell();
+      const playerCell = row.insertCell();
+      const eloCell = row.insertCell();
+      const accuracyCell = row.insertCell();
+
+      rankCell.textContent = index + 1;
+      playerCell.textContent = player.name;
+      eloCell.textContent = player.elo;
+
+      const accuracy = player.totalAnswers > 0 
+                       ? ((player.correctAnswers / player.totalAnswers) * 100).toFixed(2) 
+                       : '0.00';
+      accuracyCell.textContent = `${accuracy}%`;
+    });
+  }
+
+  function updateGlobalLeaderboard() {
+    const globalLeaderboardBody = document.getElementById("globalLeaderboardBody");
+    globalLeaderboardBody.innerHTML = "";
+
+    // Convert users object to an array for sorting
+    const allUsers = Object.keys(users).map(username => {
+        const userData = users[username];
+        return {
+            name: username,
+            elo: userData.elo || 0, // Assume ELO exists or default to 0
+            correctAnswers: userData.correctAnswers || 0,
+            totalAnswers: userData.totalAnswers || 0
+        };
+    });
+
+    // Add the current user's *current session* stats if they are logged in.
+    // This ensures their real-time accuracy and ELO are reflected, not just what was saved on logout.
+    if (currentUser) {
+        let userInGlobalBoard = false;
+        for (let i = 0; i < allUsers.length; i++) {
+            if (allUsers[i].name === currentUser.username) {
+                // Update existing user entry with current game session stats (elo, accuracy)
+                allUsers[i].elo = currentUser.elo; 
+                allUsers[i].correctAnswers = currentUser.correctAnswers;
+                allUsers[i].totalAnswers = currentUser.totalAnswers;
+                userInGlobalBoard = true;
+                break;
+            }
+        }
+        if (!userInGlobalBoard) {
+            // If for some reason current user isn't in 'users' (e.g., initial load before signup), add them
+            allUsers.push({
+                name: currentUser.username,
+                elo: currentUser.elo,
+                correctAnswers: currentUser.correctAnswers,
+                totalAnswers: currentUser.totalAnswers
+            });
+        }
+    }
+
+
+    // Sort global players by ELO (descending), then by correct answers, then by total answers
+    const sortedGlobalPlayers = allUsers.sort((a, b) => {
+        if (b.elo !== a.elo) return b.elo - a.elo;
+        if (b.correctAnswers !== a.correctAnswers) return b.correctAnswers - a.correctAnswers;
+        return a.totalAnswers - b.totalAnswers;
+    }).slice(0, 10); // Limit to top 10 players
+
+    sortedGlobalPlayers.forEach((player, index) => {
+        const row = globalLeaderboardBody.insertRow();
+        const rankCell = row.insertCell();
+        const playerCell = row.insertCell();
+        const eloCell = row.insertCell();
+        const accuracyCell = row.insertCell();
+
+        rankCell.textContent = index + 1;
+        playerCell.textContent = player.name;
+        eloCell.textContent = player.elo;
+
+        const accuracy = player.totalAnswers > 0 
+                         ? ((player.correctAnswers / player.totalAnswers) * 100).toFixed(2) 
+                         : '0.00';
+        accuracyCell.textContent = `${accuracy}%`;
+    });
+}
+
+
+  // The `simulateBotAnswer` function is no longer called in `startRound()`, 
+  // so it's effectively inactive for actual answering. 
+  // It remains here only as a reference to its previous behavior.
+  function simulateBotAnswer() {
+    const currentQuestion = questions[currentQuestionIndex];
+    const isCorrect = Math.random() < 0.7; // 70% chance bot answers correctly
+
+    const currentPlayer = players[currentPlayerIndex]; // Correctly reference the current bot player
+
+    currentPlayer.totalAnswers++; // Increment total answers for the bot
+
+    if (isCorrect) {
+      currentPlayer.elo += 10;
+      currentPlayer.correctAnswers++; // Increment correct answers for bot
+      showFeedback("correct", false, currentPlayer.name);
+    } else {
+      currentPlayer.lives--;
+      currentPlayer.elo = Math.max(0, currentPlayer.elo - 5);
+      showFeedback("wrong", false, currentPlayer.name);
+    }
+    updateLeaderboard();
+    updateGlobalLeaderboard(); // Update global leaderboard for bot answers
+
+    setTimeout(() => {
+      currentQuestionIndex++;
+      startRound();
+    }, 1500);
+  }
+
+  // --- Chat Functions ---
+  function sendMessage() {
+    const chatInput = document.getElementById('chatInput');
+    const message = chatInput.value.trim();
+    if (message && currentUser) {
+      appendMessage(currentUser.username, message);
+      chatInput.value = '';
+      // In a real application, you'd send this to a server
+    }
+  }
+
+  function appendMessage(sender, message) {
+    const chatMessages = document.getElementById('chatMessages');
+    const messageElement = document.createElement('div');
+    messageElement.innerHTML = `<strong>${sender}:</strong> ${message}`;
+    chatMessages.appendChild(messageElement);
+    chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll to bottom
+  }
+
+  // --- Solo Coding Challenge Logic ---
+
+  function startSoloChallenge() {
+    if (!currentUser) {
+        showCustomModal("Error", "You must be logged in to start a solo challenge.");
+        backToModeSelection(); // Go back to mode selection if no user
+        return;
+    }
+    // Set currentSoloStage to the user's saved stage
+    currentSoloStage = currentUser.soloStage;
+    loadSoloStage(currentSoloStage);
+    updateGlobalLeaderboard(); // Ensure global leaderboard is updated for solo players as well
+  }
+
+  function loadSoloStage(stageIndex) {
+    if (stageIndex < 0 || stageIndex >= soloChallenges.length) {
+      showCustomModal("Info", "No more stages available. You've completed all solo challenges!");
+      document.getElementById("soloProblemDescription").textContent = "All challenges completed!";
+      document.getElementById("soloCodeEditor").value = "";
+      document.getElementById("soloCodeEditor").disabled = true;
+      document.getElementById("soloChallengeButtons").querySelectorAll('button').forEach(btn => btn.disabled = true);
+      return;
+    }
+
+    currentSoloStage = stageIndex;
+    // currentUser.soloStage is updated after successful completion, not just on load
+    // The value from users[currentUser.username].soloStage is the persistent one.
+
+    const challenge = soloChallenges[currentSoloStage];
+    document.getElementById("soloCurrentStage").textContent = challenge.stage;
+    document.getElementById("soloProblemDescription").textContent = challenge.problem;
+    document.getElementById("soloCodeEditor").value = challenge.initialCode;
+    document.getElementById("soloResult").textContent = ""; // Clear previous result
+    document.getElementById("soloCodeEditor").disabled = false; // Enable editor
+
+    // Update navigation buttons
+    document.getElementById("soloPrevStageBtn").disabled = currentSoloStage === 0;
+    document.getElementById("soloNextStageBtn").disabled = currentSoloStage >= soloChallenges.length - 1;
+
+    // Enable Run Code button
+    document.querySelector("#soloChallengeButtons button:nth-child(2)").disabled = false;
+  }
+
+  function previousSoloStage() {
+    if (currentSoloStage > 0) {
+      loadSoloStage(currentSoloStage - 1);
+    }
+  }
+
+  function nextSoloStage() {
+    if (currentSoloStage < soloChallenges.length - 1) {
+      loadSoloStage(currentSoloStage + 1);
+    }
+  }
+
+  async function submitSoloCode() {
+    const code = document.getElementById("soloCodeEditor").value;
+    const currentChallenge = soloChallenges[currentSoloStage];
+    const soloLoadingIndicator = document.getElementById("soloLoadingIndicator");
+    const soloResult = document.getElementById("soloResult");
+    const runCodeButton = document.querySelector("#soloChallengeButtons button:nth-child(2)");
+
+    soloLoadingIndicator.style.display = "block";
+    runCodeButton.disabled = true; // Disable button during evaluation
+
+    try {
+      const prompt = `You are a C++ compiler and executor. I will provide C++ code, and you will compile and run it. Then, you will provide the exact output. If there are compilation errors, provide the error messages. Do not add any extra text or explanations. Only the output or errors.
+
+C++ code to compile and run:
+\`\`\`cpp
+${code}
+\`\`\`
+`;
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+        }),
+      });
+
+      const data = await response.json();
+      let output = "Error: Could not get response.";
+      if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+        output = data.candidates[0].content.parts[0].text.trim();
+      }
+
+      soloResult.textContent = `Execution Result:\n${output}`;
+
+      // Increment total answers for solo challenge
+      currentUser.totalAnswers++;
+
+      // Check if the output matches the expected output
+      if (output === currentChallenge.expectedOutput) {
+        soloResult.style.color = "lime";
+        showCustomModal("Success!", `Challenge ${currentChallenge.stage} completed!`);
+        currentUser.elo += 20; // Award ELO for solo completion
+        currentUser.correctAnswers++; // Count solo challenge as correct answer
+
+        // Only advance the soloStage if the current stage being played is the highest achieved by the user
+        // This prevents re-completing earlier stages from advancing soloStage unnecessarily.
+        if (currentSoloStage === currentUser.soloStage && currentSoloStage < soloChallenges.length - 1) {
+            currentUser.soloStage++; // Update user's persistent solo progress
+        }
+      } else {
+        soloResult.style.color = "red";
+        showCustomModal("Incorrect!", `Your output does not match the expected output. Expected:\n"${currentChallenge.expectedOutput}"`);
+      }
+
+    } catch (error) {
+      console.error('Error submitting code to Gemini:', error);
+      soloResult.textContent = 'An error occurred while evaluating your code.';
+      soloResult.style.color = 'red';
+      showCustomModal("Error", "Failed to evaluate code. Please try again.");
+    } finally {
+      soloLoadingIndicator.style.display = "none";
+      runCodeButton.disabled = false; // Re-enable button
+      // Ensure user's global stats are updated immediately after solo attempt
+      users[currentUser.username].elo = currentUser.elo; 
+      users[currentUser.username].correctAnswers = currentUser.correctAnswers;
+      users[currentUser.username].totalAnswers = currentUser.totalAnswers;
+      users[currentUser.username].soloStage = currentUser.soloStage; // Save solo stage after attempt
+      updateGlobalLeaderboard(); 
+    }
+  }
+
+  // --- Initial Setup ---
+  document.addEventListener('DOMContentLoaded', () => {
+    // Initial display based on whether a user is "logged in" (simulated)
+    if (currentUser) {
+      document.getElementById('authContainer').style.display = 'none';
+      document.getElementById('gameModeSelection').style.display = 'flex';
+      document.getElementById('logoutBtn').style.display = 'block';
+      document.getElementById('welcomeMessage').textContent = `Logged in as: ${currentUser.username}`;
+      document.getElementById('welcomeMessage').style.display = 'block';
+    } else {
+      document.getElementById('authContainer').style.display = 'flex';
+      document.getElementById('gameModeSelection').style.display = 'none';
+      document.getElementById('logoutBtn').style.display = 'none';
+      document.getElementById('welcomeMessage').style.display = 'none';
+    }
+    updateGlobalLeaderboard(); // Initial global leaderboard load
+  });
+
+</script>
+</body>
+</html>

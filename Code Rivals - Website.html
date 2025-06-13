@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<!-- saved from url=(0079)file:///C:/Users/mcyru/OneDrive/Desktop/feu%20html/Code%20Rivals%20Updated.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>Code Rivals - C++ Challenge</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: radial-gradient(circle at center, #001f3f, #000);
+    font-family: 'Orbitron', sans-serif;
+    color: #00ccff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  h1 {
+    text-shadow: 0 0 10px #00ccff;
+    margin: 20px 0 10px;
+    font-size: 32px;
+  }
+
+  .game-container {
+    position: relative;
+    width: 800px;
+    height: 600px;
+    border: 2px solid #00ccff;
+    border-radius: 20px;
+    box-shadow: 0 0 30px #00ccff inset;
+    background-color: rgba(0, 0, 50, 0.9);
+    overflow: hidden;
+    margin-top: 10px;
+  }
+
+  /* Shared button style for back button */
+  #backToLobbyBtn, #soloBackToLobbyBtn {
+    position: absolute;
+    padding: 8px 16px;
+    background-color: #001f3f;
+    border: 2px solid #00ccff;
+    color: #00ccff;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 10px #00ccff;
+    z-index: 10;
+    border-radius: 8px;
+    top: 10px;
+    left: 10px; /* Positioned on the left side */
+  }
+
+  .player-circle {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .player {
+    position: absolute;
+    width: 100px;
+    text-align: center;
+    transform: translate(-50%, -50%);
+  }
+
+  .player .name {
+    font-weight: bold;
+    font-size: 16px;
+  }
+
+  .player .name.active {
+    color: yellow;
+    text-shadow: 0 0 10px yellow;
+  }
+
+  .player .name.correct {
+    color: lime;
+    text-shadow: 0 0 10px lime;
+  }
+
+  .player .name.wrong {
+    color: red;
+    text-shadow: 0 0 10px red;
+  }
+
+  .player .lives {
+    font-size: 12px;
+  }
+
+  #timer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 48px;
+    text-shadow: 0 0 10px #00ccff;
+  }
+
+  #questionBox {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0,0,50,0.7);
+    padding: 20px;
+    border: 2px solid #00ccff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #00ccff;
+    width: 70%;
+    text-align: center;
+  }
+
+  #questionBox input[type="text"] {
+    padding: 10px;
+    font-size: 16px;
+    width: 60%;
+    background-color: black;
+    color: #00ccff;
+    border: 1px solid #00ccff;
+    border-radius: 5px;
+    margin-right: 10px;
+  }
+
+  #questionBox button {
+    padding: 10px 20px;
+    background-color: #001f3f;
+    border: 2px solid #00ccff;
+    color: #00ccff;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 10px #00ccff;
+    border-radius: 5px;
+  }
+
+  .replay-button {
+    margin-top: 20px;
+    display: none;
+  }
+
+  #leaderboard, #globalLeaderboard {
+    margin-top: 20px;
+    width: 800px;
+    background-color: rgba(0,0,0,0.85);
+    border: 3px solid #00ccff;
+    border-radius: 20px;
+    padding: 10px;
+    color: #00ccff;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 0 15px #00ccff;
+  }
+
+  #leaderboard table, #globalLeaderboard table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Orbitron', sans-serif;
+  }
+
+  #leaderboard th, #leaderboard td, #globalLeaderboard th, #globalLeaderboard td {
+    padding: 12px 10px;
+    border: 1px solid #00ccff;
+  }
+
+  #leaderboard thead, #globalLeaderboard thead {
+    background-color: #000;
+    color: #00ccff;
+    font-size: 18px;
+    text-shadow: 0 0 5px #00ccff;
+  }
+
+  #leaderboard tbody tr:nth-child(odd), #globalLeaderboard tbody tr:nth-child(odd) {
+    background-color: rgba(0, 0, 50, 0.6);
+  }
+
+  #leaderboard tbody tr:nth-child(even), #globalLeaderboard tbody tr:nth-child(even) {
+    background-color: rgba(0, 0, 100, 0.4);
+  }
+
+  #leaderboard tbody td, #globalLeaderboard tbody td {
+    font-size: 16px;
+  }
+
+  /* Styles for Game Mode Selection */
+  #gameModeSelection {
+    display: none; /* Hidden by default, shown after login */
+    background-color: rgba(0,0,50,0.9);
+    border: 2px solid #00ccff;
+    border-radius: 20px;
+    padding: 20px;
+    width: 600px;
+    text-align: center;
+    box-shadow: 0 0 20px #00ccff;
+    margin-top: 50px;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .game-mode-box {
+    flex: 1;
+    background-color: #001f3f;
+    border: 2px solid #00ccff;
+    border-radius: 15px;
+    padding: 30px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .game-mode-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 25px #00ccff;
+  }
+
+  .game-mode-box h3 {
+    margin-top: 0;
+    color: #00ccff;
+    text-shadow: 0 0 8px #00ccff;
+  }
+
+
+  #gameUI {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+  }
+
+  /* New styles for chat box */
+  .main-content-wrapper {
+    display: none; /* Hidden by default, shown when gameUI is active */
+    gap: 20px; /* Space between game UI and chat */
+    width: fit-content; /* Adjust width to fit content */
+    justify-content: center;
+    align-items: flex-start; /* Align items to the top */
+  }
+
+  #chatBox {
+    background-color: rgba(0, 0, 50, 0.9);
+    border: 2px solid #00ccff;
+    border-radius: 10px;
+    box-shadow: 0 0 20px #00ccff;
+    width: 300px; /* Fixed width for chat */
+    height: 600px; /* Match game container height */
+    margin-top: 10px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #chatMessages {
+    flex-grow: 1;
+    overflow-y: auto;
+    border: 1px solid #00ccff;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #00ccff;
+    font-size: 14px;
+    word-wrap: break-word; /* Ensure long words wrap */
+  }
+
+  #chatInput {
+    padding: 8px;
+    font-size: 14px;
+    background-color: black;
+    color: #00ccff;
+    border: 1px solid #00ccff;
+    border-radius: 5px;
+    width: calc(100% - 16px); /* Account for padding */
+    margin-bottom: 5px;
+  }
+
+  #sendChatBtn {
+    padding: 8px 15px;
+    background-color: #001f3f;
+    border: 2px solid #00ccff;
+    color: #00ccff;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 10px #00ccff;
+    border-radius: 5px;
+    width: 100%;
+  }
+
+  /* Solo Challenge UI Styles */
+  #soloChallengeUI {
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(0,0,50,0.9);
+    border: 2px solid #00ccff;
+    border-radius: 20px;
+    box-shadow: 0 0 30px #00ccff inset;
+    padding: 20px;
+    width: 800px; /* Same width as game-container for consistency */
+    height: 600px; /* Adjusted height for content */
+    margin-top: 10px;
+    position: relative;
+  }
+
+  #soloChallengeUI h2 {
+    color: #00ccff;
+    text-shadow: 0 0 8px #00ccff;
+    margin-top: 0;
+  }
+
+  #soloProblemDescription {
+    background-color: rgba(0,0,0,0.7);
+    border: 1px solid #00ccff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    width: calc(100% - 30px);
+    min-height: 80px;
+    overflow-y: auto;
+    font-size: 16px;
+  }
+
+  #soloCodeEditor {
+    width: calc(100% - 20px);
+    height: 200px;
+    background-color: #000;
+    color: #00ff00; /* Green text for code editor */
+    border: 1px solid #00ccff;
+    border-radius: 5px;
+    padding: 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    resize: vertical; /* Allow vertical resizing */
+    margin-bottom: 15px;
+  }
+
+  #soloChallengeButtons {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+
+  #soloChallengeButtons button {
+    padding: 12px 25px;
+    background-color: #001f3f;
+    border: 2px solid #00ccff;
+    color: #00ccff;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 10px #00ccff;
+    border-radius: 8px;
+    transition: background-color 0.2s, box-shadow 0.2s;
+  }
+
+  #soloChallengeButtons button:hover:not(:disabled) {
+    background-color: #003f6f;
+    box-shadow: 0 0 15px #00ff00;
+  }
+
+  #soloChallengeButtons button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  #soloLoadingIndicator {
+      display: none; /* Hidden by default */
+      text-align: center;
+      margin-top: 10px;
+      font-size: 18px;
+      color: yellow;
+  }
+
+  #soloResult {
+    background-color: rgba(0,0,0,0.7);
+    border: 1px solid #00ccff;
+    border-radius: 8px;
+    padding: 15px;
+    width: calc(100% - 30px);
+    min-height: 80px;
+    overflow-y: auto;
+    font-size: 14px;
+    white-space: pre-wrap; /* Preserve whitespace and wrap text */
+  }
+
+
+  /* Custom Modal for Alerts */
+  .custom-modal {
+      display: none; /* Hidden by default */
+      position: fixed; /* Stay in place */
+      z-index: 20; /* Sit on top */
+      left: 0;
+      top: 0;
+      width: 100%; /* Full width */
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+  }
+
+  .custom-modal-content {
+      background-color: rgba(0,0,50,0.95);
+      margin: auto;
+      padding: 30px;
+      border: 3px solid #00ccff;
+      border-radius: 15px;
+      width: 80%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 0 25px #00ccff;
+      transform: scale(0.95);
+      animation: modalFadeIn 0.3s forwards;
+      color: #fff;
+  }
+
+  .custom-modal-content h3 {
+      color: #00ccff;
+      text-shadow: 0 0 10px #00ccff;
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 24px;
+  }
+
+  .custom-modal-content p {
+      font-size: 16px;
+      margin-bottom: 25px;
+      line-height: 1.5;
+  }
+
+  .custom-modal-content button {
+      background-color: #001f3f;
+      border: 2px solid #00ccff;
+      color: #00ccff;
+      padding: 10px 25px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 0 10px #00ccff;
+      transition: background-color 0.2s, box-shadow 0.2s;
+  }
+
+  .custom-modal-content button:hover {
+      background-color: #003f6f;
+      box-shadow: 0 0 15px #00ff00;
+  }
+
+  @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+  }
+
+  /* Login/Signup Forms */
+  #authContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0,0,50,0.9);
+    border: 2px solid #00ccff;
+    border-radius: 20px;
+    padding: 30px;
+    width: 400px;
+    text-align: center;
+    box-shadow: 0 0 25px #00ccff;
+    margin-top: 50px;
+  }
+
+  #authContainer h2 {
+    color: #00ccff;
+    text-shadow: 0 0 8px #00ccff;
+    margin-top: 0;
+    margin-bottom: 25px;
+  }
+
+  #authContainer input[type="text"],
+  #authContainer input[type="password"] {
+    width: calc(100% - 20px);
+    padding: 12px;
+    margin-bottom: 15px;
+    background-color: black;
+    color: #00ccff;
+    border: 1px solid #00ccff;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+
+  #authContainer button {
+    width: 100%;
+    padding: 12px;
+    background-color: #001f3f;
+    border: 2px solid #00ccff;
+    color: #00ccff;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 10px #00ccff;
+    border-radius: 8px;
+    font-size: 18px;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    margin-bottom: 10px;
+  }
+
+  #authContainer button:hover {
+    background-color: #003f6f;
+    box-shadow: 0 0 15px #00ff00;
+  }
+
+  #authSwitch {
+    color: #00ccff;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 15px;
+  }
+
+  /* Logout Button in Main UI (will be shown after login) */
+  #logoutBtn {
+      position: absolute; /* Or relative to its container, depends on layout */
+      top: 10px; /* Adjust as needed */
+      right: 10px; /* Adjust as needed */
+      padding: 8px 16px;
+      background-color: #a00000; /* Red color for logout */
+      border: 2px solid #ff0000;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 10px #ff0000;
+      z-index: 10;
+      border-radius: 8px;
+      display: none; /* Hidden by default */
+  }
+
+  #welcomeMessage {
+      color: #fff;
+      font-size: 18px;
+      margin-top: 10px;
+      display: none; /* Hidden by default */
+  }
+
+</style>
+</head>
+<body>
+<h1>Code Rivals</h1>
+
+<button id="logoutBtn" onclick="logout()">Logout</button>
+<div id="welcomeMessage"></div>
+
+<div id="authContainer" style="display: flex;">
+  <h2 id="authTitle">Login</h2>
+  <input type="text" id="usernameInput" placeholder="Username" autocomplete="username">
+  <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password">
+  <button id="authSubmitBtn" onclick="login()">Login</button>
+  <div id="authSwitch" onclick="toggleAuthMode()">Don't have an account? Sign Up</div>
+</div>
+
+
+<div id="gameModeSelection">
+  <h2>Choose Your Game Mode</h2>
+  <div class="game-mode-box" onclick="selectGameMode(&#39;4v4-qna&#39;)">
+    <h3>4v4 Q&amp;A</h3>
+    <p>Compete with up to 4 players in a fast-paced Q&amp;A challenge.</p>
+  </div>
+  <div class="game-mode-box" onclick="selectGameMode(&#39;1v1-fill-in-blanks&#39;)">
+    <h3>1v1 Fill in the Blanks</h3>
+    <p>A head-to-head battle, filling in missing code for C++ beginners.</p>
+  </div>
+  <div class="game-mode-box" onclick="selectGameMode(&#39;solo-coding-challenge&#39;)">
+    <h3>Solo Coding Challenge</h3>
+    <p>Improve your skills by solving C++ problems, evaluated by AI.</p>
+  </div>
+</div>
+
+<div class="main-content-wrapper">
+    <div id="gameUI">
+      <div class="game-container">
+        <button id="backToLobbyBtn" onclick="backToLobby()">Back to Lobby</button>
+        <div class="player-circle" id="playerCircle"></div>
+        <div id="timer">30</div>
+        <div id="questionBox">
+          <p id="question">Loading...</p>
+          <input type="text" id="answerInput" placeholder="Your answer here">
+          <button id="submitAnswerBtn" onclick="submitAnswer()">Submit</button>
+        </div>
+      </div>
+
+      <div id="leaderboard">
+        <h2>Current Round Leaderboard</h2>
+        <table>
+          <thead>
+            <tr><th>Rank</th><th>Player</th><th>ELO</th></tr>
+          </thead>
+          <tbody id="leaderboardBody"></tbody>
+        </table>
+      </div>
+
+      <div id="globalLeaderboard">
+        <h2>Global Leaderboard (All Players)</h2>
+        <table>
+          <thead>
+            <tr><th>Rank</th><th>Player</th><th>ELO</th></tr>
+          </thead>
+          <tbody id="globalLeaderboardBody"></tbody>
+        </table>
+      </div>
+      <div class="replay-button" id="replayButton">
+        <button onclick="replayGame()">Replay</button>
+      </div>
+    </div>
+
+    <div id="soloChallengeUI">
+        <button id="soloBackToLobbyBtn" onclick="backToLobby()">Back to Lobby</button>
+        <h2>Solo Coding Challenge - Stage <span id="soloCurrentStage">1</span></h2>
+        <div id="soloProblemDescription"></div>
+        <textarea id="soloCodeEditor" placeholder="Write your C++ code here..."></textarea>
+        <div id="soloChallengeButtons">
+            <button id="soloPrevStageBtn" onclick="previousSoloStage()" disabled="">Previous Stage</button>
+            <button onclick="submitSoloCode()">Run Code</button>
+            <button id="soloNextStageBtn" onclick="nextSoloStage()" disabled="">Next Stage</button>
+        </div>
+        <div id="soloLoadingIndicator">Evaluating code...</div>
+        <div id="soloResult"></div>
+    </div>
+
+
+    <div id="chatBox">
+        <h3>Lobby Chat</h3>
+        <div id="chatMessages"></div>
+        <input type="text" id="chatInput" placeholder="Type your message...">
+        <button id="sendChatBtn" onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<div id="customModal" class="custom-modal" style="display: none;">
+    <div class="custom-modal-content">
+        <h3 id="modalTitle"></h3>
+        <p id="modalMessage"></p>
+        <button onclick="closeModal()">OK</button>
+    </div>
+</div>
+
+<script>
+  // Current user's session data - NOT PERSISTENT without a backend
+  // soloStage is the only persistent progress across sessions/game modes for the user
+  let currentUser = null; 
+
+  // Simulated "database" for user credentials (in-memory, no persistence on refresh)
+  // In a real app, this would be a backend database.
+  // Stores { username: "password", soloStage: 0 } (WARNING: NOT SECURE FOR REAL APPS)
+  const users = {}; 
+
+  let players = []; // Stores current game's player objects
+  let currentGameMode = '';
+
+  // API Key for Gemini.
+  // WARNING: Placing API keys directly in client-side code is a SECURITY RISK.
+  // For a production application, you should use a backend server to proxy requests
+  // to the Gemini API to keep your API key secure.
+  const API_KEY = "AIzaSyA5NgYegSNZz95wbNtCKI9GnloXKCczQAw"; 
+  const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+
+
+  const originalQuestions = [
+    { q: "What is the output of: cout << 2 + 2;", a: "4" },
+    { q: "Which keyword is used for constant?", a: "const" },
+    { q: "How many bytes is an int?", a: "4" },
+    { q: "C++ pointer access operator?", a: "->" },
+    { q: "Declare a pointer to int", a: "int* ptr;" }
+  ];
+
+  const fillInBlanksQuestions = [
+    { q: "int main() { cout << \"Hello, ___\"; return 0; }", a: "world", hint: "Common greeting" },
+    { q: "int ___ = 10;", a: "x", hint: "A common variable name" },
+    { q: "for (int i = 0; i < ___; i++)", a: "10", hint: "A typical loop limit" },
+    { q: "class MyClass { public: MyClass() { /* constructor */ } };", a: "MyClass", hint: "Name of the class" },
+    { q: "std::string ___ = \"C++\";", a: "language", hint: "What is C++?" }
+  ];
+
+  // Solo Coding Challenges
+  const soloChallenges = [
+    {
+      stage: 1,
+      title: "Hello World!",
+      problem: "Write a C++ program that prints 'Hello, World!' to the console. The output must exactly match 'Hello, World!' followed by a newline.",
+      expectedOutput: "Hello, World!\n",
+      initialCode: `#include <iostream>
+
+int main() {
+  // Your code here
+  return 0;
+}`
+    },
+    {
+      stage: 2,
+      title: "Add Two Numbers",
+      problem: "Write a C++ program that declares two integer variables, `a` and `b`, initializes them to 5 and 7 respectively, and prints their sum to the console. The output must be exactly '12' followed by a newline.",
+      expectedOutput: "12\n",
+      initialCode: `#include <iostream>
+
+int main() {
+  int a = 5;
+  int b = 7;
+  // Your code here
+  std::cout << (a + b) << std::endl; 
+  return 0;
+}`
+    },
+    {
+      stage: 3,
+      title: "Conditional Statement (If-Else)",
+      problem: "Write a C++ program that declares an integer variable `num` and initializes it to 10. If `num` is greater than 5, print 'Greater than 5'; otherwise, print 'Not greater than 5'. The output must be exactly 'Greater than 5' followed by a newline.",
+      expectedOutput: "Greater than 5\n",
+      initialCode: `#include <iostream>
+
+int main() {
+  int num = 10;
+  // Your if-else statement here
+  if (num > 5) { 
+    std::cout << "Greater than 5" << std::endl;
+  } else {
+    std::cout << "Not greater than 5" << std::endl;
+  }
+  return 0;
+}`
+    },
+    {
+      stage: 4,
+      title: "Simple Loop (For loop)",
+      problem: "Write a C++ program that uses a for loop to print numbers from 1 to 3, each on a new line. The output must be exactly '1\\n2\\n3\\n'.",
+      expectedOutput: "1\n2\n3\n",
+      initialCode: `#include <iostream>
+
+int main() {
+  // Your for loop here
+  for (int i = 1; i <= 3; ++i) {
+    std::cout << i << std::endl;
+  }
+  return 0;
+}`
+    },
+    {
+      stage: 5,
+      title: "Basic Function",
+      problem: "Write a C++ program with a function named `add` that takes two integers as parameters and returns their sum. In `main`, call `add` with 15 and 20 and print the result. The output must be exactly '35' followed by a newline.",
+      expectedOutput: "35\n",
+      initialCode: `#include <iostream>
+
+// Your add function here
+int add(int a, int b) {
+  return a + b;
+}
+
+int main() {
+  // Call your function and print the result
+  std::cout << add(15, 20) << std::endl;
+  return 0;
+}`
+    },
+    {
+      stage: 6,
+      title: "Factorial Calculation",
+      problem: "Write a C++ program to calculate the factorial of a number (e.g., 5). Print the result. The output must be exactly '120' followed by a newline. (Factorial of 5 is 5*4*3*2*1 = 120)",
+      expectedOutput: "120\n",
+      initialCode: `#include <iostream>
+
+int main() {
+  int n = 5;
+  long long factorial = 1; // Use long long for larger factorials
+
+  // Calculate factorial
+  for (int i = 1; i <= n; ++i) {
+    factorial *= i;
+  }
+
+  std::cout << factorial << std::endl;
+  return 0;
+}`
+    },
+    {
+      stage: 7,
+      title: "Array Sum",
+      problem: "Write a C++ program that initializes an integer array with values {10, 20, 30}. Calculate the sum of its elements and print the sum. The output must be exactly '60' followed by a newline.",
+      expectedOutput: "60\n",
+      initialCode: `#include <iostream>
+#include <vector> // Using vector is often preferred in modern C++
+
+int main() {
+  // Using a C-style array:
+  // int arr[] = {10, 20, 30};
+
+  // Or using std::vector:
+  std::vector<int> numbers = {10, 20, 30};
+  int sum = 0;
+
+  // Calculate sum
+  for (int num : numbers) {
+    sum += num;
+  }
+
+  std::cout << sum << std::endl;
+  return 0;
+}`
+    }
+  ];
+
+
+  let questions = []; // Used for Q&A and Fill-in-the-blanks
+  let currentQuestionIndex = 0;
+  let currentPlayerIndex = 0;
+  let timeLeft = 30;
+  let timer;
+
+  let currentSoloStage = 0; // Index for soloChallenges array - will be loaded from currentUser.soloStage
+
+  // --- Utility Functions ---
+
+  // Custom Modal Functions
+  function showCustomModal(title, message) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalMessage').textContent = message;
+      document.getElementById('customModal').style.display = 'flex';
+  }
+
+  function closeModal() {
+      document.getElementById('customModal').style.display = 'none';
+  }
+
+  // --- Authentication Functions (Client-side ONLY - No persistence) ---
+  let isLoginMode = true; // true for login, false for signup
+
+  function toggleAuthMode() {
+    isLoginMode = !isLoginMode;
+    const authTitle = document.getElementById('authTitle');
+    const authSubmitBtn = document.getElementById('authSubmitBtn');
+    const authSwitch = document.getElementById('authSwitch');
+
+    if (isLoginMode) {
+      authTitle.textContent = "Login";
+      authSubmitBtn.textContent = "Login";
+      authSubmitBtn.onclick = login;
+      authSwitch.textContent = "Don't have an account? Sign Up";
+    } else {
+      authTitle.textContent = "Sign Up";
+      authSubmitBtn.textContent = "Sign Up";
+      authSubmitBtn.onclick = signup;
+      authSwitch.textContent = "Already have an account? Login";
+    }
+  }
+
+  function signup() {
+    const username = document.getElementById('usernameInput').value.trim();
+    const password = document.getElementById('passwordInput').value.trim();
+
+    if (!username || !password) {
+      showCustomModal("Error", "Username and password cannot be empty.");
+      return;
+    }
+
+    if (users[username]) {
+      showCustomModal("Error", "Username already exists. Please choose a different one.");
+      return;
+    }
+
+    // Simulate saving to "database" (in-memory only)
+    users[username] = { password: password, soloStage: 0 }; // Store password and initial solo stage
+    showCustomModal("Success", `Account for "${username}" created! Please login.`);
+    // Automatically switch to login mode after successful signup
+    toggleAuthMode();
+    document.getElementById('usernameInput').value = username; // Pre-fill username
+    document.getElementById('passwordInput').value = ''; // Clear password field
+  }
+
+  function login() {
+    const username = document.getElementById('usernameInput').value.trim();
+    const password = document.getElementById('passwordInput').value.trim();
+
+    if (!username || !password) {
+      showCustomModal("Error", "Please enter username and password.");
+      return;
+    }
+
+    if (users[username] && users[username].password === password) {
+      // Load user data including soloStage
+      currentUser = { username: username, lives: 3, elo: 0, soloStage: users[username].soloStage }; 
+      showCustomModal("Success", `Welcome, ${username}!`);
+      document.getElementById('authContainer').style.display = 'none';
+      document.getElementById('gameModeSelection').style.display = 'flex';
+      document.getElementById('logoutBtn').style.display = 'block'; // Show logout button
+      document.getElementById('welcomeMessage').textContent = `Logged in as: ${currentUser.username}`;
+      document.getElementById('welcomeMessage').style.display = 'block';
+    } else {
+      showCustomModal("Error", "Invalid username or password.");
+    }
+  }
+
+  function logout() {
+    // Before logging out, save currentSoloStage back to simulated users DB
+    if (currentUser) {
+        users[currentUser.username].soloStage = currentUser.soloStage;
+    }
+
+    currentUser = null; // Clear current user session
+    if (timer) clearInterval(timer); // Stop any active game timer
+
+    // Hide game elements and show login
+    document.getElementById('gameModeSelection').style.display = 'none';
+    document.querySelector('.main-content-wrapper').style.display = 'none';
+    document.getElementById('gameUI').style.display = 'none';
+    document.getElementById('soloChallengeUI').style.display = 'none';
+    document.getElementById('chatBox').style.display = 'none';
+    document.getElementById('logoutBtn').style.display = 'none';
+    document.getElementById('welcomeMessage').style.display = 'none';
+
+    // Show authentication container
+    document.getElementById('authContainer').style.display = 'flex';
+    document.getElementById('usernameInput').value = '';
+    document.getElementById('passwordInput').value = '';
+    showCustomModal("Logged Out", "You have been logged out.");
+
+    // Reset game state for next login
+    players = [];
+    currentGameMode = '';
+    currentQuestionIndex = 0;
+    currentPlayerIndex = 0;
+    timeLeft = 30;
+    currentSoloStage = 0; // Reset this for the next login to ensure it loads from stored user data
+  }
+
+  // --- Game Mode Selection & Navigation ---
+  function selectGameMode(mode) {
+    if (!currentUser) {
+      showCustomModal("Access Denied", "Please log in to play.");
+      return;
+    }
+
+    currentGameMode = mode;
+    document.getElementById("gameModeSelection").style.display = "none";
+    document.querySelector('.main-content-wrapper').style.display = "flex";
+
+    // Initialize based on mode
+    if (currentGameMode === '4v4-qna' || currentGameMode === '1v1-fill-in-blanks') {
+      document.getElementById("gameUI").style.display = "flex";
+      document.getElementById("soloChallengeUI").style.display = "none";
+      document.getElementById("chatBox").style.display = "flex"; // Show chat for multiplayer
+      
+      // Reset current user's lives and ELO for a new game mode
+      currentUser.lives = 3; 
+      currentUser.elo = 0; 
+
+      if (currentGameMode === '4v4-qna') {
+          players = [
+            { name: currentUser.username, lives: currentUser.lives, elo: currentUser.elo },
+            { name: "Bot 1", lives: 3, elo: 0 },
+            { name: "Bot 2", lives: 3, elo: 0 },
+            { name: "Bot 3", lives: 3, elo: 0 }
+          ];
+          questions = [...originalQuestions];
+      } else { // 1v1-fill-in-blanks
+          players = [
+            { name: currentUser.username, lives: currentUser.lives, elo: currentUser.elo },
+            { name: "Opponent Bot", lives: 3, elo: 0 }
+          ];
+          questions = [...fillInBlanksQuestions];
+      }
+      startGame(); // Start multiplayer game
+    } else if (currentGameMode === 'solo-coding-challenge') {
+      document.getElementById("gameUI").style.display = "none";
+      document.getElementById("soloChallengeUI").style.display = "flex";
+      document.getElementById("chatBox").style.display = "none"; // Hide chat for solo mode
+      
+      // For solo mode, initialize currentSoloStage from currentUser's data
+      currentSoloStage = currentUser.soloStage; 
+      startSoloChallenge(); // Start solo challenge
+    }
+
+    updateLeaderboard(); // Update leaderboards for multiplayer modes initially
+  }
+
+  function backToLobby() {
+    // Stop any ongoing timers/game loops
+    if (timer) clearInterval(timer);
+
+    // Save current user's soloStage before going back to lobby
+    if (currentUser) {
+        users[currentUser.username].soloStage = currentUser.soloStage;
+    }
+
+    // Reset game-specific variables for the current game session
+    players = [];
+    currentGameMode = '';
+    currentQuestionIndex = 0;
+    currentPlayerIndex = 0;
+    timeLeft = 30;
+    // currentSoloStage is NOT reset here, as it's part of currentUser progress (and saved above)
+
+    // Hide all game UIs and show game mode selection
+    document.querySelector('.main-content-wrapper').style.display = "none";
+    document.getElementById("gameUI").style.display = "none";
+    document.getElementById("soloChallengeUI").style.display = "none";
+    document.getElementById("chatBox").style.display = "none"; // Hide chat when in lobby selection
+    document.getElementById("gameModeSelection").style.display = "flex";
+
+    // Clear game-specific UI elements
+    document.getElementById("question").textContent = "Loading...";
+    document.getElementById("answerInput").value = "";
+    document.getElementById("answerInput").disabled = false;
+    document.getElementById("submitAnswerBtn").disabled = false; // Ensure submit button is re-enabled
+    document.getElementById("replayButton").style.display = "none";
+    document.getElementById("leaderboardBody").innerHTML = "";
+
+    // Clear solo challenge UI elements (but preserve currentUser.soloStage)
+    document.getElementById("soloProblemDescription").innerHTML = "";
+    document.getElementById("soloCodeEditor").value = "";
+    document.getElementById("soloResult").textContent = "";
+    document.getElementById("soloLoadingIndicator").style.display = "none";
+    document.getElementById("soloNextStageBtn").disabled = true;
+    document.getElementById("soloPrevStageBtn").disabled = true; // Ensure prev button is reset too
+  }
+
+  // --- Multiplayer Game Logic (Q&A / Fill-in-the-Blanks) ---
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+
+  function placePlayers() {
+    const container = document.getElementById("playerCircle");
+    const centerX = container.clientWidth / 2;
+    const centerY = container.clientHeight / 2;
+    const radius = 200;
+    container.innerHTML = "";
+
+    players.forEach((player, index) => {
+      const angle = (2 * Math.PI / players.length) * index - Math.PI / 2;
+      const x = centerX + radius * Math.cos(angle);
+      const y = centerY + radius * Math.sin(angle);
+
+      const playerDiv = document.createElement("div");
+      playerDiv.className = "player";
+      playerDiv.id = `player${index}`;
+      playerDiv.style.left = `${x}px`;
+      playerDiv.style.top = `${y}px`;
+
+      const nameDiv = document.createElement("div");
+      nameDiv.className = "name";
+      nameDiv.textContent = player.name;
+
+      const livesDiv = document.createElement("div");
+      livesDiv.className = "lives";
+      livesDiv.textContent = `Lives: ${player.lives}`;
+
+      playerDiv.appendChild(nameDiv);
+      playerDiv.appendChild(livesDiv);
+      container.appendChild(playerDiv);
+    });
+  }
+
+  function updateTimer() {
+    document.getElementById("timer").textContent = timeLeft;
+  }
+
+  function countdown() {
+    timeLeft--;
+    updateTimer();
+
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      const currentPlayer = players[currentPlayerIndex];
+      showCustomModal("Time's Up!", `${currentPlayer.name} ran out of time! You lose one life.`);
+      
+      // Deduct 1 life
+      currentPlayer.lives = Math.max(0, currentPlayer.lives - 1); 
+      document.querySelector(`#player${currentPlayerIndex} .lives`).textContent = `Lives: ${currentPlayer.lives}`;
+      document.querySelector(`#player${currentPlayerIndex} .name`).classList.remove("active", "correct");
+      document.querySelector(`#player${currentPlayerIndex} .name`).classList.add("wrong"); // Visually mark as wrong
+      placePlayers(); // Update player UI
+
+      if(currentPlayer.lives <= 0){
+        showCustomModal("Game Over!", `${currentPlayer.name} lost all lives!`);
+        endGame();
+        return;
+      }
+      
+      // Move to next question and player if time runs out (considered a wrong answer)
+      currentQuestionIndex++; 
+      if(currentQuestionIndex >= questions.length){
+        showCustomModal("Round Completed!", "All questions answered!");
+        endGame();
+        return;
+      }
+      document.getElementById("question").textContent = questions[currentQuestionIndex].q;
+      document.getElementById("answerInput").value = "";
+      nextPlayer();
+    }
+  }
+
+  function startGame() {
+    if(!players.length) return;
+    currentQuestionIndex = 0;
+    currentPlayerIndex = 0;
+    timeLeft = 30;
+    shuffleArray(questions);
+    updateTimer();
+    document.getElementById("answerInput").value = "";
+    document.getElementById("answerInput").disabled = false;
+    document.getElementById("submitAnswerBtn").disabled = false; // Re-enable submit button at start
+    document.getElementById("replayButton").style.display = "none";
+
+    // Initialize player lives and ELO from currentUser object for the start of THIS game
+    players.forEach(p => {
+        if (p.name === currentUser.username) {
+            p.lives = currentUser.lives; // Use the lives set for this game mode
+            p.elo = currentUser.elo;   // Use the ELO set for this game mode
+        } else {
+            p.lives = 3; // Bots get 3 lives
+            p.elo = 0; // Bots start at 0 ELO
+        }
+    });
+
+    placePlayers();
+    highlightCurrentPlayer();
+    if(timer) clearInterval(timer);
+    timer = setInterval(countdown, 1000); 
+    // Display the first question
+    document.getElementById("question").textContent = questions[currentQuestionIndex].q;
+  }
+
+  function highlightCurrentPlayer() {
+    players.forEach((p, i) => {
+      const nameDiv = document.querySelector(`#player${i} .name`);
+      if(nameDiv){
+        nameDiv.classList.remove("active", "correct", "wrong");
+      }
+    });
+    const nameDiv = document.querySelector(`#player${currentPlayerIndex} .name`);
+    if(nameDiv){
+      nameDiv.classList.add("active");
+    }
+  }
+
+  async function judgeAnswerWithGemini(questionText, userAnswer, correctAnswer, hint) {
+      // Simulate AI response for now to ensure game logic works without API key
+      // In a real application, you'd make the actual API call here.
+      // For this demonstration, we'll use a simple direct comparison.
+
+      let isCorrect = userAnswer.toLowerCase() === correctAnswer.toLowerCase();
+      let explanation = isCorrect ? "Your answer is correct!" : `The correct answer was "${correctAnswer}".`;
+
+      if (!isCorrect && currentGameMode === '1v1-fill-in-blanks' && hint) {
+          explanation += ` Hint: ${hint}`;
+      }
+      
+      // A more robust AI judging prompt would be:
+      // const prompt = `Evaluate if the user's answer "${userAnswer}" is correct for the question "${questionText}". The official correct answer is "${correctAnswer}". Consider minor variations like capitalization and punctuation. If applicable, also consider the hint: "${hint}". Respond in JSON format: {"isCorrect": boolean, "explanation": "string"}`;
+      // ... actual fetch to Gemini API ...
+
+      return { isCorrect, explanation };
+  }
+
+
+  async function submitAnswer() {
+    const submitBtn = document.getElementById("submitAnswerBtn");
+    const input = document.getElementById("answerInput");
+
+    // Disable button to prevent spamming
+    submitBtn.disabled = true;
+    input.disabled = true;
+
+    if (!players.length) {
+        showCustomModal("Error", "No players in the game.");
+        submitBtn.disabled = false;
+        input.disabled = false;
+        return;
+    }
+
+    if (currentQuestionIndex >= questions.length) {
+        // This should ideally not happen if endGame is called correctly,
+        // but as a failsafe to prevent 'reading q of undefined'
+        showCustomModal("Game State Error", "No more questions available. Game might have ended.");
+        submitBtn.disabled = false;
+        input.disabled = false;
+        endGame(); // Ensure game state is properly ended
+        return;
+    }
+
+    const userAnswer = input.value.trim();
+    const currentQuestion = questions[currentQuestionIndex];
+    const questionText = currentQuestion.q;
+    const correctAnswer = currentQuestion.a;
+    const hint = currentQuestion.hint || '';
+    const nameDiv = document.querySelector(`#player${currentPlayerIndex} .name`);
+    const currentPlayer = players[currentPlayerIndex];
+
+    clearInterval(timer); // Stop timer while judging
+
+    if (!userAnswer) {
+      showCustomModal("Empty Answer", "Please type an answer before submitting.");
+      timer = setInterval(countdown, 1000); 
+      submitBtn.disabled = false; // Re-enable if empty answer
+      input.disabled = false;
+      return;
+    }
+
+
+    try {
+        const { isCorrect, explanation } = await judgeAnswerWithGemini(questionText, userAnswer, correctAnswer, hint);
+
+        if(isCorrect){
+            if(nameDiv){
+                nameDiv.classList.remove("active", "wrong");
+                nameDiv.classList.add("correct");
+            }
+            currentPlayer.elo += 10; // Gain ELO for correct answer
+            // Update currentUser's ELO if it's the current user's entry in 'players' array
+            if (currentPlayer.name === currentUser.username) {
+                currentUser.elo = currentPlayer.elo;
+            }
+            updateLeaderboard();
+
+            currentQuestionIndex++;
+            if(currentQuestionIndex >= questions.length){
+                showCustomModal("Round Completed!", `Correct! ${explanation}`);
+                endGame();
+                return;
+            }
+            document.getElementById("question").textContent = questions[currentQuestionIndex].q;
+            input.value = "";
+            timeLeft = 30;
+            updateTimer();
+            nextPlayer();
+        } else {
+            if(nameDiv){
+                nameDiv.classList.remove("active", "correct");
+                nameDiv.classList.add("wrong");
+            }
+            // Deduct 1 life for incorrect answer
+            currentPlayer.lives = Math.max(0, currentPlayer.lives - 1);
+            document.querySelector(`#player${currentPlayerIndex} .lives`).textContent = `Lives: ${currentPlayer.lives}`;
+            // Update currentUser's lives if it's the current user's entry in 'players' array
+            if (currentPlayer.name === currentUser.username) {
+                currentUser.lives = currentPlayer.lives;
+            }
+
+            showCustomModal("Incorrect Answer", `Your answer was wrong. ${explanation}`);
+
+            if(currentPlayer.lives <= 0){
+                showCustomModal("Game Over!", `${currentPlayer.name} lost all lives!`);
+                endGame();
+                return;
+            }
+            // Move to next question and player if answer is wrong
+            currentQuestionIndex++;
+            if(currentQuestionIndex >= questions.length){
+                showCustomModal("Round Completed!", "All questions answered!");
+                endGame();
+                return;
+            }
+            document.getElementById("question").textContent = questions[currentQuestionIndex].q;
+            input.value = "";
+            nextPlayer();
+        }
+    } catch (error) {
+        console.error("Error judging answer with Gemini:", error);
+        showCustomModal("AI Error", `Could not judge answer. Please check your API key or network. Error: ${error.message}`);
+        
+        // If AI fails, treat as incorrect for now to prevent game halt (deduct 1 life)
+        currentPlayer.lives = Math.max(0, currentPlayer.lives - 1);
+        document.querySelector(`#player${currentPlayerIndex} .lives`).textContent = `Lives: ${currentPlayer.lives}`;
+        if (currentPlayer.name === currentUser.username) {
+            currentUser.lives = currentPlayer.lives;
+        }
+
+        if(currentPlayer.lives <= 0){
+            showCustomModal("Game Over!", `${currentPlayer.name} lost all lives!`);
+            endGame();
+            return;
+        }
+        currentQuestionIndex++;
+        if(currentQuestionIndex >= questions.length){
+            showCustomModal("Round Completed!", "All questions answered!");
+            endGame();
+            return;
+        }
+        document.getElementById("question").textContent = questions[currentQuestionIndex].q;
+        input.value = "";
+        nextPlayer();
+    } finally {
+        submitBtn.disabled = false; // Re-enable submit button
+        input.disabled = false; // Re-enable input
+        placePlayers(); // Re-render players to update status colors
+    }
+  }
+
+
+  function nextPlayer() {
+    currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+    highlightCurrentPlayer();
+    timeLeft = 30;
+    updateTimer();
+    timer = setInterval(countdown, 1000);
+  }
+
+  function updateLeaderboard() {
+    const tbody = document.getElementById("leaderboardBody");
+    tbody.innerHTML = "";
+
+    let sortedPlayers = [...players].sort((a,b) => b.elo - a.elo);
+
+    sortedPlayers.forEach((player, i) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${i+1}</td><td>${player.name}</td><td>${player.elo}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function updateGlobalLeaderboard() {
+    // This function doesn't make sense without user persistence, so it will now just display a placeholder.
+    const tbody = document.getElementById("globalLeaderboardBody");
+    tbody.innerHTML = `<tr><td colspan="3">Global Leaderboard not available without user accounts.</td></tr>`;
+  }
+
+  function endGame() {
+    clearInterval(timer);
+    updateLeaderboard();
+    updateGlobalLeaderboard(); 
+    document.getElementById("replayButton").style.display = "block";
+    document.getElementById("answerInput").disabled = true;
+    document.getElementById("submitAnswerBtn").disabled = true; // Disable submit button at end of game
+    // No persistence saving here as there's no backend for multiplayer game progress
+  }
+
+  function replayGame() {
+    // When replaying, reset lives and ELO for the player AND bots
+    // The user's lives and ELO are already reset to 3 and 0 when entering the game mode.
+    // For replay, we apply the same logic.
+    if (currentUser) {
+        currentUser.lives = 3; 
+        currentUser.elo = 0;   
+    }
+    
+    players.forEach(p => {
+      if (p.name === currentUser.username) {
+          p.lives = currentUser.lives; 
+          p.elo = currentUser.elo;   
+      } else {
+          p.lives = 3; // Bots reset to 3 lives
+          p.elo = 0;   // Bots reset to 0 ELO
+      }
+    });
+
+    document.getElementById("replayButton").style.display = "none";
+    document.getElementById("answerInput").disabled = false;
+    document.getElementById("submitAnswerBtn").disabled = false; // Re-enable submit button for replay
+    placePlayers();
+    updateLeaderboard();
+    startGame();
+  }
+
+  // --- Solo Coding Challenge Logic ---
+  function startSoloChallenge() {
+    const soloNextStageBtn = document.getElementById("soloNextStageBtn");
+    const soloPrevStageBtn = document.getElementById("soloPrevStageBtn");
+
+    // Ensure currentSoloStage is loaded from currentUser and within bounds
+    currentSoloStage = currentUser.soloStage;
+    if (currentSoloStage < 0) currentSoloStage = 0;
+    if (currentSoloStage >= soloChallenges.length) currentSoloStage = soloChallenges.length - 1;
+
+    document.getElementById("soloCurrentStage").textContent = currentSoloStage + 1; // Display 1-based stage number
+
+    if (currentSoloStage < soloChallenges.length) {
+      const challenge = soloChallenges[currentSoloStage];
+      document.getElementById("soloProblemDescription").innerHTML = `<b>Stage ${currentSoloStage + 1}: ${challenge.title}</b><br>${challenge.problem}`;
+      document.getElementById("soloCodeEditor").value = challenge.initialCode;
+      document.getElementById("soloResult").textContent = "Submit your code to see the result!";
+      document.getElementById("soloResult").style.color = "#00ccff"; // Reset color
+      document.getElementById("soloCodeEditor").disabled = false;
+
+      // Enable/disable navigation buttons based on current stage and user's progress
+      soloPrevStageBtn.disabled = (currentSoloStage === 0);
+      soloNextStageBtn.disabled = (currentSoloStage >= soloChallenges.length - 1 || currentUser.soloStage <= currentSoloStage);
+                                                                        
+    } else {
+      // All challenges completed
+      showCustomModal("Congratulations!", "You have completed all solo challenges! You are a C++ master!");
+      document.getElementById("soloProblemDescription").textContent = "All challenges completed!";
+      document.getElementById("soloCodeEditor").value = "";
+      document.getElementById("soloCodeEditor").disabled = true;
+      document.getElementById("soloChallengeButtons").style.display = "none"; // Hide buttons
+      document.getElementById("soloResult").textContent = "Amazing job!";
+      soloNextStageBtn.disabled = true; // Always disabled when all completed
+      soloPrevStageBtn.disabled = (soloChallenges.length === 0); // Can go back if there were any stages
+    }
+  }
+
+  async function submitSoloCode() {
+    const userCode = document.getElementById("soloCodeEditor").value;
+    const currentChallenge = soloChallenges[currentSoloStage];
+    const soloResultEl = document.getElementById("soloResult");
+    const soloLoadingIndicator = document.getElementById("soloLoadingIndicator");
+    const soloRunCodeBtn = document.querySelector('#soloChallengeButtons button:nth-child(2)'); // "Run Code" button
+    const soloNextStageBtn = document.getElementById("soloNextStageBtn");
+
+    soloResultEl.textContent = ""; // Clear previous result
+    soloLoadingIndicator.style.display = "block"; // Show loading indicator
+    soloRunCodeBtn.disabled = true; // Disable Run Code button
+    soloNextStageBtn.disabled = true; // Disable next stage button while evaluating
+
+    if (!userCode.trim()) {
+        soloResultEl.textContent = "Please enter some code!";
+        soloResultEl.style.color = "red";
+        soloLoadingIndicator.style.display = "none";
+        soloRunCodeBtn.disabled = false; // Re-enable
+        return;
+    }
+
+    try {
+        const prompt = `You are a C++ code interpreter and tester.
+Given the following C++ code and a problem description, simulate running the code and determine if it correctly solves the problem.
+Consider compilation, runtime behavior, and whether the output matches the expected output.
+Be flexible with whitespace (spaces, tabs, newlines) and leading/trailing characters when comparing the output, focusing on the core content.
+For example, "Hello, World!\\n" should match "Hello, World!" or "Hello, World!  \\n".
+If the code compiles and runs successfully and its normalized output matches the expected normalized output, set "success" to true.
+If there are compilation errors or runtime issues, set "success" to false and provide a detailed error message in the "error" field.
+If the code compiles and runs but the output does not match the expected output (even after normalization), set "success" to false and explain the discrepancy in the "error" field.
+
+Respond in JSON format:
+\`\`\`json
+{
+  "success": boolean, // true if code runs correctly and meets problem requirements
+  "output": "string", // The simulated standard output (stdout) of the code, if successful
+  "error": "string" // Error message if compilation fails, runtime error, or output mismatch, otherwise empty.
+}
+\`\`\`
+
+Problem: ${currentChallenge.problem}
+Expected Output (literal string for your reference, but allow flexibility): "${currentChallenge.expectedOutput}"
+
+C++ Code:
+\`\`\`cpp
+${userCode}
+\`\`\`
+`;
+
+        let chatHistory = [];
+        chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+        const payload = {
+            contents: chatHistory,
+            generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: "OBJECT",
+                    properties: {
+                        "success": { "type": "BOOLEAN" },
+                        "output": { "type": "STRING" },
+                        "error": { "type": "STRING" }
+                    },
+                    required: ["success", "output", "error"]
+                }
+            }
+        };
+
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        console.log("Gemini Raw Response:", result); // Log raw response for debugging
+
+        if (result.candidates && result.candidates.length > 0 &&
+            result.candidates[0].content && result.candidates[0].content.parts &&
+            result.candidates[0].content.parts.length > 0) {
+
+            const textResponse = result.candidates[0].content.parts[0].text;
+            let parsedJson;
+            try {
+                parsedJson = JSON.parse(textResponse);
+            } catch (jsonError) {
+                console.error("Failed to parse Gemini's JSON:", textResponse, jsonError);
+                soloResultEl.textContent = `AI Response Parse Error: Gemini returned invalid JSON.\nRaw AI Response: ${textResponse}\nError: ${jsonError.message}`;
+                soloResultEl.style.color = "orange";
+                return;
+            }
+
+            if (parsedJson.success) {
+                soloResultEl.textContent = `Success! 🎉\nOutput:\n${parsedJson.output}`;
+                soloResultEl.style.color = "lime";
+                
+                // If passed, and not on the last stage, enable next stage
+                if (currentSoloStage < soloChallenges.length - 1) { 
+                    // Only advance user's progress if they just completed this stage for the first time
+                    if (currentUser.soloStage === currentSoloStage) { 
+                        currentUser.soloStage++; // Advance user's progress
+                        users[currentUser.username].soloStage = currentUser.soloStage; // Persist to simulated DB
+                    }
+                    soloNextStageBtn.disabled = false; 
+                } else { // If it's the very last stage
+                    showCustomModal("All Challenges Mastered!", "You've successfully completed every solo coding challenge! Great job!");
+                    soloNextStageBtn.disabled = true; // No more stages
+                }
+
+            } else {
+                soloResultEl.textContent = `Failed! 😢\n${parsedJson.error}\n\nYour code's simulated output:\n${parsedJson.output}`;
+                soloResultEl.style.color = "red";
+                soloNextStageBtn.disabled = true; // Keep disabled if failed
+            }
+        } else {
+            soloResultEl.textContent = "Error: Could not get a valid response from the AI. Check API key and network.";
+            soloResultEl.style.color = "red";
+        }
+
+    } catch (error) {
+        console.error("Error evaluating code with Gemini:", error);
+        soloResultEl.textContent = `An error occurred while connecting to AI: ${error.message}. Make sure your API key is correct.`;
+        soloResultEl.style.color = "red";
+    } finally {
+        soloLoadingIndicator.style.display = "none"; // Hide loading indicator
+        soloRunCodeBtn.disabled = false; // Re-enable Run Code button
+    }
+  }
+
+  function nextSoloStage() {
+    currentSoloStage++;
+    startSoloChallenge(); // This will handle button enabling/disabling based on new currentSoloStage
+  }
+
+  function previousSoloStage() {
+    currentSoloStage--;
+    startSoloChallenge(); // This will handle button enabling/disabling based on new currentSoloStage
+  }
+
+
+  // --- Chat Box Functions (Client-side simulation only) ---
+  function sendMessage() {
+    const chatInput = document.getElementById('chatInput');
+    const message = chatInput.value.trim();
+
+    if (message && currentUser) {
+      displayMessage(currentUser.username, message);
+      chatInput.value = '';
+    } else if (message && !currentUser) {
+        showCustomModal("Chat Error", "You must be logged in to chat.");
+        chatInput.value = ''; // Clear message even if not logged in
+    }
+  }
+
+  function displayMessage(sender, message) {
+    const chatMessages = document.getElementById('chatMessages');
+    const messageElement = document.createElement('p');
+    messageElement.textContent = `${sender}: ${message}`;
+    chatMessages.appendChild(messageElement);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Event listener for sending chat messages with Enter key
+    const chatInput = document.getElementById('chatInput');
+    if (chatInput) {
+      chatInput.addEventListener('keypress', (event) => {
+        if (event.key === 'Enter') {
+          sendMessage();
+        }
+      });
+    }
+
+    // Event listener for solo code editor (e.g., Tab key handling for indentation)
+    const soloCodeEditor = document.getElementById('soloCodeEditor');
+    if (soloCodeEditor) {
+      soloCodeEditor.addEventListener('keydown', function(e) {
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          const start = this.selectionStart;
+          const end = this.selectionEnd;
+
+          // set textarea value to: text before caret + tab + text after caret
+          this.value = this.value.substring(0, start) + "\t" + this.value.substring(end);
+
+          // put caret at right position again
+          this.selectionStart = this.selectionEnd = start + 1;
+        }
+      });
+    }
+
+    // Initially show the authentication container
+    document.getElementById("authContainer").style.display = "flex";
+  });
+
+</script>
+
+
+</body></html>

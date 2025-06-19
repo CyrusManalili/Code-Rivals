@@ -17,25 +17,25 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        min-height: 100vh;
+        min-height: 100vh; /* Use min-height for content adaptability */
         width: 100vw;
-        overflow-x: hidden;
-        overflow-y: auto;
-        font-family: 'Inter', sans-serif;
+        overflow-x: hidden; /* Prevent horizontal scroll */
+        overflow-y: auto; /* Allow vertical scroll for content */
+        font-family: 'Inter', sans-serif; /* Use Inter for general text */
     }
 
     h1 {
         text-shadow: 0 0 10px #00ccff;
         margin: 20px 0 10px;
         font-size: 32px;
-        font-family: 'Orbitron', sans-serif;
+        font-family: 'Orbitron', sans-serif; /* Keep Orbitron for titles */
     }
 
     .game-container {
         position: relative;
-        width: 90%;
-        max-width: 900px;
-        height: 650px;
+        width: 90%; /* Responsive width */
+        max-width: 900px; /* Increased max width */
+        height: 650px; /* Increased height */
         border: 2px solid #00ccff;
         border-radius: 20px;
         box-shadow: 0 0 30px #00ccff inset;
@@ -44,6 +44,7 @@
         margin-top: 10px;
     }
 
+    /* New: Reusable class for the primary button style */
     .primary-btn {
         padding: 8px 16px;
         background-color: #001f3f;
@@ -59,22 +60,28 @@
     .primary-btn:hover {
         transform: translateY(-2px);
         box-shadow: 0 0 15px #00ff00;
-        background-color: #003f6f;
+        background-color: #003f6f; /* Slightly darker on hover */
     }
 
+
+    /* Shared button style for back button (now uses primary-btn) */
     #backToLobbyBtn, #soloBackToLobbyBtn, .back-to-mode-selection-btn, .back-to-lobbies-btn {
         position: absolute;
         top: 10px;
-        left: 10px;
+        left: 10px; /* Positioned on the left side */
     }
 
+    /* Specific styling for the 'Ready Up!' button in singleLobbyView header */
     #readyToggleBtn {
-        position: relative;
+        position: relative; /* Override absolute positioning if inherited */
+        /* Keep other styles from .primary-btn */
     }
 
-    .lobby-header .primary-btn {
-        position: relative;
-        margin-right: 0;
+    /* Specific styling for the 'Create New Lobby' button in lobby-list-container header */
+    .lobby-header .primary-btn { /* Target specifically the create lobby button */
+        position: relative; /* Override absolute positioning if inherited */
+        /* Keep other styles from .primary-btn */
+        margin-right: 0; /* Adjust margin if needed */
         margin-bottom: 0;
     }
 
@@ -135,16 +142,16 @@
         border: 2px solid #00ccff;
         border-radius: 10px;
         box-shadow: 0 0 10px #00ccff;
-        width: 90%;
-        max-width: 700px;
+        width: 90%; /* Responsive width */
+        max-width: 700px; /* Max width for question box */
         text-align: center;
-        box-sizing: border-box;
+        box-sizing: border-box; /* Include padding in width */
     }
 
     #questionBox input[type="text"] {
         padding: 10px;
         font-size: 16px;
-        width: calc(70% - 15px);
+        width: calc(70% - 15px); /* Adjusted width */
         background-color: black;
         color: #00ccff;
         border: 1px solid #00ccff;
@@ -176,7 +183,7 @@
 
     #leaderboard, #globalLeaderboard {
         margin-top: 20px;
-        width: 95%;
+        width: 95%; /* Expanded width */
         max-width: 900px;
         background-color: rgba(0,0,0,0.85);
         border: 3px solid #00ccff;
@@ -188,7 +195,7 @@
         text-align: center;
         box-shadow: 0 0 15px #00ccff;
         height: auto;
-        margin-bottom: 20px;
+        margin-bottom: 20px; /* Added margin */
     }
 
     #leaderboard table, #globalLeaderboard table {
@@ -221,9 +228,10 @@
         font-size: 16px;
     }
 
+    /* Styles for Game Mode Selection */
     #gameModeSelection {
-        display: none;
-        flex-direction: column;
+        display: none; /* Hidden by default, shown after login */
+        flex-direction: column; /* Changed to column for better mobile layout */
         align-items: center;
         background-color: rgba(0,0,50,0.9);
         border: 2px solid #00ccff;
@@ -238,7 +246,7 @@
     }
 
     .game-mode-box {
-        width: 100%;
+        width: 100%; /* Full width within container */
         background-color: #001f3f;
         border: 2px solid #00ccff;
         border-radius: 15px;
@@ -267,37 +275,39 @@
         flex-grow: 1;
     }
 
+    /* New styles for chat box */
     .main-content-wrapper {
         display: none;
-        flex-direction: row;
+        flex-direction: row; /* Default to row for wider screens */
         gap: 20px;
-        width: 95%;
-        max-width: 1200px;
+        width: 95%; /* Adjust width to fit content */
+        max-width: 1200px; /* Max width for the wrapper */
         justify-content: center;
         align-items: stretch;
         flex-grow: 1;
-        min-height: 80vh;
-        flex-wrap: wrap;
+        min-height: 80vh; /* Occupy significant vertical space */
+        flex-wrap: wrap; /* Allow wrapping for smaller screens */
     }
-    @media (max-width: 992px) {
+    @media (max-width: 992px) { /* Adjust for tablet/mobile */
         .main-content-wrapper {
-            flex-direction: column;
+            flex-direction: column; /* Stack vertically on smaller screens */
             align-items: center;
         }
         .game-container, #chatBox, #soloChallengeUI {
-            width: 95%;
-            max-width: 650px;
+            width: 95%; /* Wider on smaller screens */
+            max-width: 650px; /* Adjust max-width */
         }
     }
+
 
     #chatBox {
         background-color: rgba(0, 0, 50, 0.9);
         border: 2px solid #00ccff;
         border-radius: 10px;
         box-shadow: 0 0 20px #00ccff;
-        width: 300px;
-        height: auto;
-        min-height: 300px;
+        width: 300px; /* Fixed width for chat */
+        height: auto; /* Allow height to adjust */
+        min-height: 300px; /* Minimum height for chat box */
         margin-top: 10px;
         padding: 15px;
         display: flex;
@@ -315,7 +325,7 @@
         color: #00ccff;
         font-size: 14px;
         word-wrap: break-word;
-        min-height: 150px;
+        min-height: 150px; /* Ensure chat messages area has min height */
     }
 
     #chatInput {
@@ -346,6 +356,7 @@
         box-shadow: 0 0 15px #00ff00;
     }
 
+    /* Solo Challenge UI Styles */
     #soloChallengeUI {
         display: none;
         flex-direction: column;
@@ -355,9 +366,9 @@
         border-radius: 20px;
         box-shadow: 0 0 30px #00ccff inset;
         padding: 20px;
-        width: 90%;
-        max-width: 900px;
-        min-height: 650px;
+        width: 90%; /* Responsive width */
+        max-width: 900px; /* Same max-width as game-container for consistency */
+        min-height: 650px; /* Adjusted min-height for content */
         margin-top: 10px;
         position: relative;
         flex-grow: 1;
@@ -388,7 +399,7 @@
         width: calc(100% - 20px);
         height: 200px;
         background-color: #000;
-        color: #00ff00;
+        color: #00ff00; /* Green text for code editor */
         border: 1px solid #00ccff;
         border-radius: 5px;
         padding: 10px;
@@ -401,7 +412,7 @@
 
     #soloChallengeButtons {
         display: flex;
-        flex-wrap: wrap;
+        flex-wrap: wrap; /* Allow buttons to wrap */
         justify-content: center;
         gap: 15px;
         margin-bottom: 15px;
@@ -450,6 +461,8 @@
         box-sizing: border-box;
     }
 
+
+    /* Custom Modal for Alerts */
     .custom-modal {
         display: none;
         position: fixed;
@@ -471,7 +484,7 @@
         padding: 30px;
         border: 3px solid #00ccff;
         border-radius: 15px;
-        width: 90%;
+        width: 90%; /* Responsive width */
         max-width: 400px;
         text-align: center;
         box-shadow: 0 0 25px #00ccff;
@@ -517,6 +530,7 @@
         to { opacity: 1; transform: scale(1); }
     }
 
+    /* Login/Signup Forms */
     #authContainer {
         display: flex;
         flex-direction: column;
@@ -586,6 +600,7 @@
         color: #00ff00;
     }
 
+    /* Logout Button in Main UI (will be shown after login) */
     #logoutBtn {
         position: absolute;
         top: 10px;
@@ -616,6 +631,7 @@
         margin-bottom: 20px;
     }
 
+    /* New Lobby Styles */
     .lobby-list-container {
         display: none;
         flex-direction: column;
@@ -660,7 +676,7 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        min-height: 120px;
+        min-height: 120px; /* Adjusted to min-height */
     }
 
     .lobby-card:hover {
@@ -718,18 +734,18 @@
         align-items: center;
         width: 100%;
         margin-bottom: 20px;
-        flex-wrap: wrap;
+        flex-wrap: wrap; /* Allow wrap for title and buttons */
     }
 
     .lobby-header button {
-        position: relative;
+        position: relative; /* Remove absolute positioning from here */
         top: auto;
         left: auto;
-        margin-right: 10px;
-        margin-bottom: 10px;
+        margin-right: 10px; /* Adjust spacing between buttons */
+        margin-bottom: 10px; /* Space when wrapped */
     }
     .lobby-header h2 {
-        flex-grow: 1;
+        flex-grow: 1; /* Allow title to take available space */
         text-align: center;
         margin-bottom: 10px;
     }
@@ -786,8 +802,9 @@
         color: #330000;
     }
 
+    /* Styles for the Create Lobby Modal */
     #createLobbyModal {
-        display: none;
+        display: none; /* Hidden by default */
         position: fixed;
         z-index: 20;
         left: 0;
@@ -830,9 +847,10 @@
         font-size: 16px;
         box-sizing: border-box;
     }
-
+    
+    /* Specific styling for select dropdown arrow */
     #createLobbyModal .custom-modal-content select {
-        appearance: none;
+        appearance: none; /* Remove default browser arrow */
         -webkit-appearance: none;
         -moz-appearance: none;
         background-image: url('data:image/svg+xml;utf8,<svg fill="%2300ccff" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
@@ -841,12 +859,15 @@
         background-size: 16px;
     }
 
+
+    /* Apply primary-btn style to these modal buttons too */
     #createLobbyModal .custom-modal-content button {
-        width: auto;
+        width: auto; /* Allow buttons to size based on content */
         min-width: 120px;
-        margin: 0 10px;
-        padding: 10px 25px;
-        background-color: #001f3f;
+        margin: 0 10px; /* Spacing between buttons */
+        /* Removed duplicate button styling, now inherits from .primary-btn */
+        padding: 10px 25px; /* Adjust padding for modal buttons if different */
+        background-color: #001f3f; /* Keep specific background for modal buttons if desired, or remove to inherit */
         border: 2px solid #00ccff;
         color: #00ccff;
         font-weight: bold;
@@ -858,6 +879,7 @@
         background-color: #003f6f;
         box-shadow: 0 0 15px #00ff00;
     }
+
 
     .modal-buttons {
         display: flex;
@@ -1011,27 +1033,35 @@
 <script>
     // Global game state variables
     let currentUser = null;
-    let userId = null;
-    let currentLobbyType = '';
+    let userId = null; // Client-side generated ID for anonymous users, or username for registered
+    let currentLobbyType = ''; // '4v4-qna', '1v1-fill-in-blanks', 'solo-coding-challenge'
     let currentLobbyId = '';
 
+    // In-memory "database" for user credentials (NO PERSISTENCE)
+    // Stores { username: { password: "password", soloStage: 0, correctAnswers: 0, totalAnswers: 0, elo: 0, id: "uniqueId" } }
     const users = {};
-    let nextUserId = 1;
+    let nextUserId = 1; // Simple counter for unique user IDs
 
-    const activeLobbies = {};
+    // In-memory "database" for active lobbies (NO PERSISTENCE)
+    const activeLobbies = {}; // Stores { lobbyId: { id: "...", name: "...", type: "...", players: [], maxPlayers: N, gameStarted: false, chatMessages: [] } }
 
-    let players = [];
-    let isPlayerReady = false;
+    let players = []; // Local array of players in the current lobby
+    let isPlayerReady = false; // Current user's ready status in the current lobby
 
+    // Game variables for Q&A / Fill-in-the-blanks modes
     let questions = [];
     let currentQuestionIndex = 0;
     let currentPlayerIndex = 0;
     let timeLeft = 30;
     let timer;
 
-    let currentSoloStage = 0;
+    // Solo Challenge variables
+    let currentSoloStage = 0; // Index for soloChallenges array - will be loaded from user data
 
-    const API_KEY = ""; // Keep empty as per instructions, will be provided by Canvas runtime.
+    // API Key for Gemini.
+    // WARNING: For a production application, you should use a backend server to proxy requests
+    // to the Gemini API to keep your API key secure.
+    const API_KEY = "AIzaSyA5NgYegSNZz95wbNtCKI9GnloXKCczQAw"; // Keep empty as per instructions, will be provided by Canvas runtime.
     const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
 
 
@@ -1051,6 +1081,7 @@
         { q: "std::string ___ = \"C++\";", a: "language", hint: "What is C++?" }
     ];
 
+    // Solo Coding Challenges
     const soloChallenges = [
         {
             stage: 1,
@@ -1082,9 +1113,12 @@ int main() {
         {
             stage: 3,
             title: "Conditional Statement"
+            // ... (rest of your soloChallenges array)
         }
     ];
 
+
+    // Function to show a custom modal alert
     function showAlert(title, message) {
         document.getElementById('modalTitle').innerText = title;
         document.getElementById('modalMessage').innerText = message;
@@ -1095,7 +1129,8 @@ int main() {
         document.getElementById('customModal').style.display = 'none';
     }
 
-    let isLoginMode = true;
+    // --- Authentication Functions ---
+    let isLoginMode = true; // Track if currently in login or signup mode
 
     function toggleAuthMode() {
         isLoginMode = !isLoginMode;
@@ -1114,9 +1149,10 @@ int main() {
         }
 
         if (isLoginMode) {
+            // Login logic
             if (users[username] && users[username].password === password) {
                 currentUser = username;
-                userId = users[username].id;
+                userId = users[username].id; // Set userId from registered user
                 showModeSelection();
                 document.getElementById('welcomeMessage').innerText = `Welcome, ${currentUser}!`;
                 document.getElementById('welcomeMessage').style.display = 'block';
@@ -1125,6 +1161,7 @@ int main() {
                 showAlert('Login Failed', 'Invalid username or password.');
             }
         } else {
+            // Sign Up logic
             if (users[username]) {
                 showAlert('Sign Up Failed', 'Username already exists. Please choose a different one.');
             } else {
@@ -1133,11 +1170,11 @@ int main() {
                     soloStage: 0,
                     correctAnswers: 0,
                     totalAnswers: 0,
-                    elo: 1000,
-                    id: `user_${nextUserId++}`
+                    elo: 1000, // Starting ELO
+                    id: `user_${nextUserId++}` // Assign a unique ID
                 };
                 showAlert('Success', 'Account created! Please log in.');
-                toggleAuthMode();
+                toggleAuthMode(); // Switch back to login mode after signup
             }
         }
     }
@@ -1151,17 +1188,19 @@ int main() {
         document.getElementById('singleLobbyView').style.display = 'none';
         document.getElementById('gameUI').style.display = 'none';
         document.getElementById('soloChallengeUI').style.display = 'none';
-        document.getElementById('mainContentWrapper').style.display = 'none';
+        document.getElementById('mainContentWrapper').style.display = 'none'; // Ensure wrapper is hidden
         document.getElementById('welcomeMessage').style.display = 'none';
         document.getElementById('logoutBtn').style.display = 'none';
+        // Clear inputs
         document.getElementById('usernameInput').value = '';
         document.getElementById('passwordInput').value = '';
     }
 
+    // --- UI Navigation Functions ---
     function showModeSelection() {
         document.getElementById('authContainer').style.display = 'none';
         document.getElementById('gameModeSelection').style.display = 'flex';
-        document.getElementById('mainContentWrapper').style.display = 'none';
+        document.getElementById('mainContentWrapper').style.display = 'none'; // Ensure main wrapper is hidden
         document.getElementById('lobbyListContainer').style.display = 'none';
         document.getElementById('singleLobbyView').style.display = 'none';
         document.getElementById('gameUI').style.display = 'none';
@@ -1170,7 +1209,7 @@ int main() {
     }
 
     function backToModeSelection() {
-        currentLobbyType = '';
+        currentLobbyType = ''; // Clear selected lobby type
         showModeSelection();
     }
 
@@ -1185,11 +1224,11 @@ int main() {
     function backToLobbiesList() {
         document.getElementById('singleLobbyView').style.display = 'none';
         document.getElementById('lobbyListContainer').style.display = 'flex';
-        currentLobbyId = '';
-        isPlayerReady = false;
-        document.getElementById('readyToggleBtn').innerText = 'Ready Up!';
-        document.getElementById('readyToggleBtn').classList.remove('ready-btn', 'not-ready-btn');
-        renderLobbies();
+        currentLobbyId = ''; // Clear current lobby ID
+        isPlayerReady = false; // Reset ready status
+        document.getElementById('readyToggleBtn').innerText = 'Ready Up!'; // Reset button text
+        document.getElementById('readyToggleBtn').classList.remove('ready-btn', 'not-ready-btn'); // Remove specific classes
+        renderLobbies(); // Refresh lobby list
     }
 
     function showGameUI() {
@@ -1198,9 +1237,9 @@ int main() {
         document.getElementById('singleLobbyView').style.display = 'none';
         document.getElementById('soloChallengeUI').style.display = 'none';
 
-        document.getElementById('mainContentWrapper').style.display = 'flex';
+        document.getElementById('mainContentWrapper').style.display = 'flex'; // Show main wrapper
         document.getElementById('gameUI').style.display = 'flex';
-        document.getElementById('chatBox').style.display = 'flex';
+        document.getElementById('chatBox').style.display = 'flex'; // Show chat box for multiplayer
     }
 
     function selectGameMode(mode) {
@@ -1208,6 +1247,7 @@ int main() {
         if (mode === 'solo-coding-challenge') {
             showSoloChallengeUI();
         } else {
+            // For multiplayer modes, go to lobby list first
             showLobbyList(mode);
         }
     }
@@ -1217,14 +1257,18 @@ int main() {
         document.getElementById('lobbyListContainer').style.display = 'none';
         document.getElementById('singleLobbyView').style.display = 'none';
         document.getElementById('gameUI').style.display = 'none';
-        document.getElementById('chatBox').style.display = 'none';
+        document.getElementById('chatBox').style.display = 'none'; // Hide chat for solo mode
 
         document.getElementById('mainContentWrapper').style.display = 'flex';
         document.getElementById('soloChallengeUI').style.display = 'flex';
 
+        // Load user's last solo stage
         currentSoloStage = users[currentUser] ? users[currentUser].soloStage : 0;
         loadSoloChallenge();
     }
+
+
+    // --- Lobby Management Functions ---
 
     function generateLobbyId() {
         return Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -1250,7 +1294,7 @@ int main() {
         }
 
         const newLobbyId = generateLobbyId();
-        const currentPlayer = { name: currentUser, id: userId, ready: false };
+        const currentPlayer = { name: currentUser, id: userId, ready: false }; // Current user is automatically in the lobby
 
         activeLobbies[newLobbyId] = {
             id: newLobbyId,
@@ -1259,18 +1303,19 @@ int main() {
             players: [currentPlayer],
             maxPlayers: maxPlayers,
             gameStarted: false,
-            chatMessages: []
+            chatMessages: [] // Initialize chat for the lobby
         };
 
-        currentLobbyId = newLobbyId;
+        currentLobbyId = newLobbyId; // Set the newly created lobby as the current one
         closeCreateLobbyModal();
-        joinLobby(newLobbyId);
+        joinLobby(newLobbyId); // Automatically join and display the new lobby
         showAlert('Lobby Created', `Lobby "${lobbyName}" created! ID: ${newLobbyId}`);
     }
 
+
     function renderLobbies() {
         const lobbiesGrid = document.getElementById('lobbiesGrid');
-        lobbiesGrid.innerHTML = '';
+        lobbiesGrid.innerHTML = ''; // Clear existing lobbies
 
         const availableLobbies = Object.values(activeLobbies).filter(lobby => lobby.type === currentLobbyType);
 
@@ -1301,7 +1346,7 @@ int main() {
         const lobby = activeLobbies[lobbyId];
         if (!lobby) {
             showAlert('Error', 'Lobby not found!');
-            renderLobbies();
+            renderLobbies(); // Refresh the list in case it was removed
             return;
         }
 
@@ -1317,16 +1362,20 @@ int main() {
             return;
         }
 
+        // Check if the current user is already in this lobby
         const existingPlayer = lobby.players.find(p => p.id === userId);
         if (!existingPlayer) {
+            // Add current user to the lobby
             lobby.players.push({ name: currentUser, id: userId, ready: false });
         } else {
+            // If user rejoins, make sure their ready status is reflected from the lobby state
             isPlayerReady = existingPlayer.ready;
         }
 
-        currentLobbyId = lobbyId;
+        currentLobbyId = lobbyId; // Set the current lobby ID
         showSingleLobbyView(lobbyId);
     }
+
 
     function showSingleLobbyView(lobbyId) {
         document.getElementById('lobbyListContainer').style.display = 'none';
@@ -1346,7 +1395,7 @@ int main() {
 
         updateLobbyPlayersDisplay(lobby);
         updateReadyButtonState();
-        updateStartGameButtonState();
+        updateStartGameButtonState(); // Check if Start Game should be enabled
     }
 
     function updateLobbyPlayersDisplay(lobby) {
@@ -1355,9 +1404,9 @@ int main() {
 
         lobby.players.forEach(player => {
             const playerCard = document.createElement('div');
-            playerCard.classList.add('lobby-card');
-            playerCard.style.cursor = 'default';
-            playerCard.style.minHeight = 'auto';
+            playerCard.classList.add('lobby-card'); // Reuse lobby-card styling for player display
+            playerCard.style.cursor = 'default'; // No pointer for player cards
+            playerCard.style.minHeight = 'auto'; // Adjust height
             playerCard.style.padding = '15px';
 
 
@@ -1373,6 +1422,7 @@ int main() {
             lobbyPlayersDisplay.appendChild(playerCard);
         });
 
+        // Update player count
         document.getElementById('displayPlayerCount').innerText = lobby.players.length;
     }
 
@@ -1384,10 +1434,11 @@ int main() {
             const player = lobby.players.find(p => p.id === userId);
             if (player) {
                 player.ready = !player.ready;
-                isPlayerReady = player.ready;
+                isPlayerReady = player.ready; // Update local state
                 updateReadyButtonState();
-                updateLobbyPlayersDisplay(lobby);
-                updateStartGameButtonState();
+                updateLobbyPlayersDisplay(lobby); // Refresh player list
+                updateStartGameButtonState(); // Re-evaluate start game button
+                // In a real app, you'd send this "ready" status to the server
                 showAlert('Ready Status', `You are now ${isPlayerReady ? 'READY' : 'NOT READY'}.`);
             }
         }
@@ -1415,9 +1466,10 @@ int main() {
             return;
         }
 
+        // Only the first player (host) can start the game in this basic implementation
         const isHost = lobby.players[0] && lobby.players[0].id === userId;
         const allPlayersReady = lobby.players.length > 0 && lobby.players.every(p => p.ready);
-        const hasMinPlayers = lobby.players.length >= 2;
+        const hasMinPlayers = lobby.players.length >= 2; // Example: require at least 2 players
 
         startGameButton.disabled = !(isHost && allPlayersReady && hasMinPlayers);
 
@@ -1433,6 +1485,7 @@ int main() {
         }
     }
 
+
     function startGame() {
         if (!currentLobbyId || !currentUser) {
             showAlert('Error', 'No active lobby or user.');
@@ -1445,12 +1498,14 @@ int main() {
             return;
         }
 
+        // Basic host check (first player in the lobby)
         const isHost = lobby.players[0] && lobby.players[0].id === userId;
         if (!isHost) {
             showAlert('Permission Denied', 'Only the lobby host can start the game.');
             return;
         }
 
+        // Check if all players are ready and there are enough players
         const allPlayersReady = lobby.players.length > 0 && lobby.players.every(p => p.ready);
         const hasMinPlayers = lobby.players.length >= 2;
 
@@ -1467,59 +1522,70 @@ int main() {
         lobby.gameStarted = true;
         showAlert('Game Started!', 'The game is commencing!');
         showGameUI();
-        initGame();
+        initGame(); // Initialize the game UI and logic
     }
+
 
     function leaveLobby() {
         if (!currentLobbyId || !currentUser) return;
 
         const lobby = activeLobbies[currentLobbyId];
         if (lobby) {
+            // Remove current user from the lobby's player list
             lobby.players = lobby.players.filter(p => p.id !== userId);
 
+            // If the lobby becomes empty, delete it (or mark for cleanup)
             if (lobby.players.length === 0) {
                 delete activeLobbies[currentLobbyId];
                 console.log(`Lobby ${currentLobbyId} deleted as it's empty.`);
             } else {
+                // If the host leaves, assign a new host (first player in the updated list)
+                // In a real app, this would involve more sophisticated host migration logic
                 if (lobby.gameStarted) {
                     showAlert('Game Interrupted', 'The host left the game. Lobby disbanded.');
-                    delete activeLobbies[currentLobbyId];
+                    delete activeLobbies[currentLobbyId]; // Force close if game was running
                 }
                 console.log(`Player ${currentUser} left lobby ${currentLobbyId}.`);
             }
         }
         currentLobbyId = '';
-        isPlayerReady = false;
-        backToLobbiesList();
+        isPlayerReady = false; // Reset ready status
+        backToLobbiesList(); // Return to the lobby list
     }
 
+    // --- In-Game Functions (Q&A / Fill-in-the-blanks) ---
+
     function initGame() {
+        // Determine which set of questions to use based on currentLobbyType
         questions = currentLobbyType === '4v4-qna' ? [...originalQuestions] : [...fillInBlanksQuestions];
+        // Shuffle questions
         questions.sort(() => Math.random() - 0.5);
 
+        // Initialize players for the game UI (copy from lobby players)
+        // Ensure player objects have 'lives', 'score', 'accuracy', etc.
         players = activeLobbies[currentLobbyId].players.map(p => ({
             name: p.name,
             id: p.id,
-            lives: 3,
+            lives: 3, // Example: starting lives
             score: 0,
-            correctAnswers: users[p.name]?.correctAnswers || 0,
-            totalAnswers: users[p.name]?.totalAnswers || 0,
-            elo: users[p.name]?.elo || 1000
+            correctAnswers: users[p.name]?.correctAnswers || 0, // Load from user data
+            totalAnswers: users[p.name]?.totalAnswers || 0, // Load from user data
+            elo: users[p.name]?.elo || 1000 // Load ELO
         }));
 
         currentQuestionIndex = 0;
-        currentPlayerIndex = 0;
+        currentPlayerIndex = 0; // Start with the first player
         renderPlayers();
         nextQuestion();
         updateLeaderboard();
-        updateGlobalLeaderboard();
+        updateGlobalLeaderboard(); // Show global leaderboard during game too
     }
 
     function renderPlayers() {
         const playerCircle = document.getElementById('playerCircle');
         playerCircle.innerHTML = '';
         const numPlayers = players.length;
-        const radius = playerCircle.offsetWidth / 2 - 50;
+        const radius = playerCircle.offsetWidth / 2 - 50; // Adjust radius for player box size
 
         players.forEach((player, index) => {
             const angle = (360 / numPlayers) * index;
@@ -1540,7 +1606,7 @@ int main() {
     }
 
     function nextQuestion() {
-        clearTimeout(timer);
+        clearTimeout(timer); // Clear any existing timer
 
         if (currentQuestionIndex >= questions.length) {
             endGame();
@@ -1552,6 +1618,7 @@ int main() {
         document.getElementById('answerInput').value = '';
         document.getElementById('answerInput').focus();
 
+        // Highlight current player
         players.forEach(p => document.getElementById(`player-${p.id}`).classList.remove('active', 'correct', 'wrong'));
         const currentPlayerElement = document.getElementById(`player-${players[currentPlayerIndex].id}`);
         if (currentPlayerElement) {
@@ -1579,15 +1646,17 @@ int main() {
         const correctAnswer = questions[currentQuestionIndex].a;
         const currentPlayer = players[currentPlayerIndex];
 
+        // Update user's total answers for overall accuracy tracking
         if (users[currentUser]) {
             users[currentUser].totalAnswers++;
         }
 
+
         if (userAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
             showAlert('Correct!', 'Your answer is correct!');
-            currentPlayer.score += 100;
+            currentPlayer.score += 100; // Example score
             if (users[currentUser]) {
-                users[currentUser].correctAnswers++;
+                users[currentUser].correctAnswers++; // Update user's correct answers
             }
             document.getElementById(`player-${currentPlayer.id}`).classList.add('correct');
         } else {
@@ -1598,9 +1667,10 @@ int main() {
         updateLeaderboard();
         updateGlobalLeaderboard();
 
+        // Move to next player
         currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
         currentQuestionIndex++;
-        setTimeout(nextQuestion, 2000);
+        setTimeout(nextQuestion, 2000); // Wait 2 seconds before next question
     }
 
     function handleIncorrectAnswer() {
@@ -1608,12 +1678,13 @@ int main() {
         currentPlayer.lives--;
         if (currentPlayer.lives <= 0) {
             showAlert('Eliminated!', `${currentPlayer.name} has been eliminated!`);
-            players = players.filter(p => p.id !== currentPlayer.id);
-            renderPlayers();
-            if (players.length <= 1) {
+            players = players.filter(p => p.id !== currentPlayer.id); // Remove eliminated player
+            renderPlayers(); // Re-render players
+            if (players.length <= 1) { // If only one or no players left
                 endGame();
                 return;
             }
+            // Adjust currentPlayerIndex if the current player was removed and it was the last one
             if (currentPlayerIndex >= players.length) {
                 currentPlayerIndex = 0;
             }
@@ -1627,20 +1698,24 @@ int main() {
         document.getElementById('timer').style.display = 'none';
         document.getElementById('replayButton').style.display = 'block';
 
+        // Update ELO for all participating players
+        // This is a simplified ELO update for demonstration
         const winner = players.length > 0 ? players[0] : null;
 
         players.forEach(player => {
             if (users[player.name]) {
+                // For simplicity, just increase ELO for winners and decrease for others
+                // A proper ELO system would involve pairwise comparisons and K-factors
                 if (winner && player.id === winner.id) {
-                    users[player.name].elo += 10;
+                    users[player.name].elo += 10; // Winner gains ELO
                 } else {
-                    users[player.name].elo -= 5;
+                    users[player.name].elo -= 5; // Losers lose ELO
                 }
-                users[player.name].elo = Math.max(0, users[player.name].elo);
+                users[player.name].elo = Math.max(0, users[player.name].elo); // Ensure ELO doesn't go below 0
             }
         });
 
-        updateLeaderboard();
+        updateLeaderboard(); // Final update
         updateGlobalLeaderboard();
     }
 
@@ -1655,6 +1730,7 @@ int main() {
         const leaderboardBody = document.getElementById('leaderboardBody');
         leaderboardBody.innerHTML = '';
 
+        // Sort players by score, then lives
         const sortedPlayers = [...players].sort((a, b) => {
             if (b.score !== a.score) return b.score - a.score;
             return b.lives - a.lives;
@@ -1674,27 +1750,30 @@ int main() {
         const globalLeaderboardBody = document.getElementById('globalLeaderboardBody');
         globalLeaderboardBody.innerHTML = '';
 
+        // Convert users object to an array and sort by ELO
         const allUsers = Object.values(users);
         const sortedGlobalUsers = [...allUsers].sort((a, b) => b.elo - a.elo);
 
         sortedGlobalUsers.forEach((user, index) => {
             const row = globalLeaderboardBody.insertRow();
             row.insertCell().innerText = index + 1;
-            row.insertCell().innerText = Object.keys(users).find(key => users[key] === user);
+            row.insertCell().innerText = Object.keys(users).find(key => users[key] === user); // Get username
             row.insertCell().innerText = user.elo;
             const accuracy = user.totalAnswers > 0 ? ((user.correctAnswers / user.totalAnswers) * 100).toFixed(0) : 0;
             row.insertCell().innerText = `${accuracy}%`;
         });
     }
 
+    // --- Solo Challenge Functions ---
     async function loadSoloChallenge() {
         const stageData = soloChallenges[currentSoloStage];
         if (stageData) {
             document.getElementById('soloCurrentStage').innerText = stageData.stage;
             document.getElementById('soloProblemDescription').innerText = stageData.problem;
             document.getElementById('soloCodeEditor').value = stageData.initialCode;
-            document.getElementById('soloResult').innerText = '';
+            document.getElementById('soloResult').innerText = ''; // Clear previous result
 
+            // Update navigation buttons
             document.getElementById('soloPrevStageBtn').disabled = currentSoloStage === 0;
             document.getElementById('soloNextStageBtn').disabled = currentSoloStage >= soloChallenges.length - 1;
         } else {
@@ -1762,18 +1841,20 @@ int main() {
 
             const data = await response.json();
             const resultText = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0] ? data.candidates[0].content.parts[0].text : 'No response from API.';
-
+            
             soloResultDiv.innerText = resultText;
 
+            // Check for PASSED/FAILED/ERROR verdict from the API response
             const verdictMatch = resultText.match(/(PASSED|FAILED|ERROR)$/m);
             const verdict = verdictMatch ? verdictMatch[1] : '';
 
             if (verdict === 'PASSED') {
                 showAlert('Challenge Passed!', 'Great job! Moving to the next stage.');
+                // Update user's solo stage
                 if (users[currentUser]) {
                     users[currentUser].soloStage = currentSoloStage + 1;
                 }
-                setTimeout(nextSoloStage, 1500);
+                setTimeout(nextSoloStage, 1500); // Auto-advance to next stage
             } else if (verdict === 'FAILED') {
                 showAlert('Challenge Failed', 'Your code produced an incorrect output. Please review your code.');
             } else if (verdict === 'ERROR') {
@@ -1791,11 +1872,14 @@ int main() {
         }
     }
 
+
     function leaveSoloChallenge() {
         document.getElementById('mainContentWrapper').style.display = 'none';
         showModeSelection();
     }
 
+
+    // --- Chat Functions ---
     function sendMessage() {
         const chatInput = document.getElementById('chatInput');
         const message = chatInput.value.trim();
@@ -1812,7 +1896,7 @@ int main() {
 
     function renderChatMessages() {
         const chatMessagesDiv = document.getElementById('chatMessages');
-        chatMessagesDiv.innerHTML = '';
+        chatMessagesDiv.innerHTML = ''; // Clear existing messages
 
         if (currentLobbyId) {
             const lobby = activeLobbies[currentLobbyId];
@@ -1822,14 +1906,19 @@ int main() {
                     msgElement.innerHTML = `[${msg.timestamp}] <strong>${msg.sender}</strong>: ${msg.text}`;
                     chatMessagesDiv.appendChild(msgElement);
                 });
+                // Scroll to the bottom
                 chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
             }
         }
     }
 
+
+    // Initial setup when page loads
     document.addEventListener('DOMContentLoaded', () => {
+        // Initially show auth container
         document.getElementById('authContainer').style.display = 'flex';
 
+        // Bind Enter key to authAction in login/signup form
         document.getElementById('usernameInput').addEventListener('keypress', function(event) {
             if (event.key === 'Enter') {
                 document.getElementById('passwordInput').focus();
@@ -1841,12 +1930,14 @@ int main() {
             }
         });
 
+        // Bind Enter key to sendMessage in chat input
         document.getElementById('chatInput').addEventListener('keypress', function(event) {
             if (event.key === 'Enter') {
                 sendMessage();
             }
         });
 
+        // Bind Enter key to submitAnswer in game question input
         document.getElementById('answerInput').addEventListener('keypress', function(event) {
             if (event.key === 'Enter') {
                 submitAnswer();

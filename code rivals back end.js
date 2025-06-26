@@ -16,7 +16,7 @@ const server = http.createServer(app);
 // Use CORS middleware before Socket.IO to handle API requests
 // This allows your frontend (CLIENT_URL) to make HTTP requests to this backend.
 app.use(cors({
-    origin: process.env.CLIENT_URL || "https://code-rivals-h3hd.onrender.com", // Allow requests from your frontend
+    origin: process.env.CLIENT_URL || "https://code-rivals-4jf9.onrender.com", // Allow requests from your frontend
     methods: ["GET", "POST"]
 }));
 
@@ -24,7 +24,7 @@ app.use(cors({
 // This allows your frontend to establish WebSocket connections for real-time features.
 const io = socketIo(server, {
     cors: {
-        origin: process.env.CLIENT_URL || "https://code-rivals-h3hd.onrender.com",
+        origin: process.env.CLIENT_URL || "https://code-rivals-4jf9.onrender.com",
         methods: ["GET", "POST"]
     }
 });

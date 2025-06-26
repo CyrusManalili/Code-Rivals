@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Rivals</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <style>
+        /* Basic Reset & Body Styling */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e0f2f7; /* Light blue background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+            box-sizing: border-box; /* Include padding and border in the element's total width and height */
+            overflow-y: auto; /* Allow scrolling if content overflows */
+        }
+
+        /* Overall app container */
+        .app-container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            width: 95%; /* Adjust width for responsiveness */
+            max-width: 1200px; /* Maximum width for larger screens */
+            margin: 20px auto; /* Center with margin */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Hide overflow from rounded corners */
+        }
+
+        /* Header Styling */
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 20px 30px;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.2em;
+            font-weight: 600;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info #welcomeMessage {
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        /* Main Content Wrapper (for sections and chat) */
+        .main-content-wrapper {
+            display: flex; /* Use flexbox for main content + chat layout */
+            flex-grow: 1; /* Allow it to grow */
+            padding: 30px;
+            gap: 30px; /* Space between main content and chat */
+        }
+
+        /* Common Section Styling */
+        section {
+            background-color: #f8fafd; /* Light blue-ish background for sections */
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            flex-grow: 1; /* Allow sections to fill available space */
+            display: flex; /* Make sections flex containers for internal layout */
+            flex-direction: column;
+        }
+
+        section.hidden {
+            display: none;
+        }
+
+        h2 {
+            text-align: center;
+            color: #0056b3;
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+        }
+
+        /* Form elements */
+        .auth-form, .chat-input-area {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: -8px; /* Pull label closer to input */
+        }
+
+        input[type="text"],
+        input[type="password"],
+        textarea {
+            padding: 12px;
+            border: 1px solid #cce7f0; /* Softer border */
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        textarea:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); /* Focus highlight */
+            outline: none;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 180px; /* Taller editor */
+        }
+
+        button {
+            padding: 12px 25px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px); /* Slight lift effect */
+        }
+
+        button:active {
+            transform: translateY(0); /* Press effect */
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* Auth Section Specific */
+        .auth-section {
+            max-width: 400px; /* Narrower auth form */
+            margin: auto; /* Center auth form */
+        }
+
+        .auth-switch-text {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.95em;
+            color: #555;
+        }
+
+        .auth-switch-text span {
+            color: #007bff;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        /* Game Mode Selection Section */
+        .game-mode-selection-section {
+            text-align: center;
+        }
+
+        .mode-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            gap: 15px;
+            margin-top: 20px;
+            margin-bottom: 40px;
+        }
+
+        .mode-buttons button {
+            flex: 1; /* Allow buttons to grow */
+            min-width: 200px; /* Minimum width for buttons */
+            background-color: #28a745; /* Green for game modes */
+        }
+
+        .mode-buttons button:hover {
+            background-color: #218838;
+        }
+
+        /* Leaderboard */
+        .leaderboard-container {
+            margin-top: 30px;
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden; /* For rounded table corners */
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table thead th {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        table tbody td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #444;
+        }
+
+        table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        table tbody tr:hover {
+            background-color: #eef7fd; /* Highlight on hover */
+        }
+
+        /* Game UI (Simulated Multiplayer) */
+        .game-ui-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr; /* Game info/question and visual, then leaderboard */
+            gap: 30px;
+            align-items: start; /* Align content to the top */
+        }
+
+        .game-info {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background-color: #e9f7fe; /* Lighter blue */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .game-info p {
+            margin: 0;
+            font-size: 1.1em;
+        }
+
+        .question-display {
+            background-color: #fff;
+            border: 1px solid #cce7f0;
+            border-radius: 6px;
+            padding: 15px;
+            min-height: 80px;
+            display: flex;
+            align-items: center; /* Vertically center question text */
+            justify-content: center; /* Horizontally center question text */
+            font-size: 1.2em;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .game-visuals {
+            position: relative; /* For player circle positioning */
+            height: 350px; /* Fixed height for the circle area */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #eef7fd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        #playerCircle {
+            position: relative;
+            width: 100%; /* Max width of its container */
+            height: 100%; /* Max height of its container */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%; /* Make it a circle */
+        }
+
+        .player {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background-color: #ffffff;
+            border: 2px solid #007bff;
+            border-radius: 50%; /* Make player div circular */
+            width: 100px; /* Size of player circle */
+            height: 100px;
+            justify-content: center;
+            font-size: 0.9em;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            padding: 5px; /* Inner padding for text */
+            box-sizing: border-box;
+        }
+
+        .player .name {
+            font-weight: bold;
+            color: #0056b3;
+            white-space: nowrap; /* Prevent name from wrapping */
+            overflow: hidden;
+            text-overflow: ellipsis; /* Add ellipsis if name is too long */
+            max-width: 90%; /* Constrain name width */
+        }
+
+        .player .lives {
+            color: #dc3545; /* Red for lives */
+            font-size: 0.85em;
+        }
+
+        .player.active { /* Apply .active class to the player div itself */
+            border-color: #28a745; /* Green for active player border */
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.7); /* Glowing effect */
+        }
+
+        /* Solo Challenge UI */
+        .solo-challenge-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .challenge-problem {
+            background-color: #e9f7fe;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .challenge-problem h3 {
+            margin-top: 0;
+            color: #0056b3;
+        }
+
+        .code-editor-container {
+            position: relative; /* For loading spinner positioning */
+            flex-grow: 1; /* Allow editor to take vertical space */
+            min-height: 250px; /* Minimum height for the editor */
+        }
+
+        .solo-challenge-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .solo-challenge-buttons button {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .solo-result-area {
+            background-color: #333;
+            color: #0f0; /* Green text for console-like output */
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap; /* Preserve whitespace and wrap text */
+            word-wrap: break-word; /* Break long words */
+            min-height: 100px;
+            overflow-y: auto;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .solo-result-area h3 {
+            color: #007bff; /* Title remains blue */
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        /* Chat Box Styling */
+        .chat-box {
+            background-color: #f8fafd;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            width: 300px; /* Fixed width for chat */
+            min-width: 280px; /* Min width for chat */
+            max-height: 70vh; /* Max height to fit screen */
+        }
+
+        .chat-box h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #0056b3;
+            text-align: center;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            border: 1px solid #cce7f0;
+            border-radius: 6px;
+            padding: 10px;
+            overflow-y: auto;
+            background-color: #ffffff;
+            margin-bottom: 15px;
+            scroll-behavior: smooth;
+        }
+
+        .chat-messages div {
+            margin-bottom: 8px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+        .chat-messages .chat-message-server {
+            color: #007bff;
+            font-style: italic;
+            font-weight: 500;
+        }
+        .chat-messages .chat-message-user {
+            color: #333;
+        }
+        .chat-messages .chat-message-self {
+            color: #28a745;
+            font-weight: 500;
+        }
+
+
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input-area input {
+            flex-grow: 1;
+        }
+
+        .chat-input-area button {
+            padding: 10px 15px;
+            font-size: 0.9em;
+            background-color: #6c757d; /* Gray for chat send */
+        }
+
+        .chat-input-area button:hover {
+            background-color: #5a6268;
+        }
+
+        /* Custom Modal */
+        .custom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; /* Ensure it's on top */
+            backdrop-filter: blur(3px); /* Optional: blur background */
+            -webkit-backdrop-filter: blur(3px); /* Safari support */
+            display: none; /* Hidden by default */
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            transform: translateY(-20px); /* Initial slight lift */
+            animation: modalPopUp 0.3s ease-out forwards;
+        }
+
+        .modal-content h2 {
+            color: #007bff;
+            margin-bottom: 15px;
+            font-size: 1.6em;
+        }
+
+        .modal-content p {
+            font-size: 1.1em;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .modal-content button {
+            background-color: #007bff;
+            padding: 10px 20px;
+            font-size: 1em;
+            font-weight: 500;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #007bff;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto; /* Center the spinner */
+        }
+
+        .loading-spinner.hidden {
+            display: none;
+        }
+
+        /* Animations */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes modalPopUp {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Utility Class */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .app-container {
+                margin: 10px auto;
+                padding: 15px;
+                width: 98%;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+
+            .main-content-wrapper {
+                flex-direction: column;
+                padding: 20px;
+                gap: 20px;
+            }
+
+            .chat-box {
+                width: 100%; /* Full width on small screens */
+                max-height: 40vh; /* Limit chat height */
+            }
+
+            .game-ui-section {
+                grid-template-columns: 1fr; /* Single column layout for game UI */
+            }
+
+            .mode-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .mode-buttons button {
+                width: 90%; /* Make buttons wider */
+            }
+
+            .player {
+                width: 80px; /* Smaller player circles */
+                height: 80px;
+                font-size: 0.8em;
+            }
+
+            .game-visuals {
+                height: 250px; /* Smaller visual area */
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="custom-modal" id="customModal">
+        <div class="modal-content">
+            <h2 id="modalTitle"></h2>
+            <p id="modalMessage"></p>
+            <button onclick="closeModal()">OK</button>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <header>
+            <h1>Code Rivals</h1>
+            <div class="user-info">
+                <span id="welcomeMessage" style="display: none;"></span>
+                <button id="logoutBtn" style="display: none;">Logout</button>
+            </div>
+        </header>
+
+        <main class="main-content-wrapper">
+            <section id="authContainer" class="auth-section">
+                <h2 id="authTitle">Login</h2>
+                <div class="auth-form">
+                    <label for="usernameInput">Username:</label>
+                    <input type="text" id="usernameInput" placeholder="Enter username" autocomplete="username">
+
+                    <label for="passwordInput">Password:</label>
+                    <input type="password" id="passwordInput" placeholder="Enter password" autocomplete="current-password">
+
+                    <button id="authSubmitBtn">Login</button>
+                    <p class="auth-switch-text">
+                        <span id="authSwitch">Don't have an account? Sign Up</span>
+                    </p>
+                </div>
+            </section>
+
+            <section id="gameModeSelection" class="game-mode-selection-section hidden">
+                <h2>Choose Your Challenge</h2>
+                <div class="mode-buttons">
+                    <button id="soloCodingChallengeBtn">Solo Coding Challenges</button>
+                    <button id="multiplayer4v4Btn">4v4 Q&A Battle (Simulated)</button>
+                    <button id="multiplayer1v1Btn">1v1 Fill-in-the-Blanks (Simulated)</button>
+                </div>
+
+                <h3>Global Leaderboard</h3>
+                <div class="leaderboard-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Username</th>
+                                <th>ELO</th>
+                            </tr>
+                        </thead>
+                        <tbody id="globalLeaderboardBody">
+                            </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="gameUI" class="game-ui-section hidden">
+                <h2>Game On!</h2>
+                <div class="game-info">
+                    <p>Time Left: <span id="timer">30</span>s</p>
+                    <p>Current Question:</p>
+                    <div class="question-display">
+                        <p id="question"></p>
+                    </div>
+                    <input type="text" id="answerInput" placeholder="Your Answer">
+                    <button id="submitAnswerBtn">Submit Answer</button>
+                    <button id="nextQuestionBtn" class="hidden">Next Question</button>
+                    <button id="replayButton" class="hidden">Replay Game</button>
+                    <button id="backToLobbyBtnGameUI">Back to Lobby</button>
+                </div>
+                <div class="game-visuals">
+                    <div id="playerCircle">
+                        </div>
+                </div>
+            </section>
+
+            <section id="soloChallengeUI" class="solo-challenge-section hidden">
+                <h2>Solo Coding Challenge - Stage <span id="soloCurrentStage">0</span></h2>
+                <div class="challenge-problem">
+                    <h3>Problem Description:</h3>
+                    <p id="soloProblemDescription"></p>
+                </div>
+                <div class="code-editor-container">
+                    <textarea id="soloCodeEditor" placeholder="Write your C++ code here..."></textarea>
+                    <div id="soloLoadingIndicator" class="loading-spinner hidden"></div>
+                </div>
+                <div class="solo-challenge-buttons">
+                    <button id="soloPrevStageBtn">Previous Stage</button>
+                    <button id="runCodeBtn">Run Code</button>
+                    <button id="soloNextStageBtn">Next Stage</button>
+                    <button id="backToLobbyBtnSoloUI">Back to Lobby</button>
+                </div>
+                <div class="solo-result-area">
+                    <h3>Evaluation Result:</h3>
+                    <pre id="soloResult"></pre>
+                </div>
+            </section>
+        </main>
+
+        <aside id="chatBox" class="chat-box hidden">
+            <h3>Lobby Chat</h3>
+            <div id="chatMessages" class="chat-messages">
+                </div>
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="Type a message...">
+                <button id="sendChatBtn">Send</button>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        // IMPORTANT: Replace this with your actual DEPLOYED Render backend URL
+        const BACKEND_URL = "https://code-rivals-h3hd.onrender.com"; // e.g., "https://code-rivals-backend-xyz.onrender.com"
+        const socket = io(BACKEND_URL); // Initialize Socket.IO connection
+
+        let currentUser = null; // Will hold { username, soloStage, elo } + token
+        let jwtToken = localStorage.getItem('jwtToken'); // Try to load token from local storage
+
+        let players = []; // Stores current game's player objects (local representation for simulated games)
+        let currentGameMode = '';
+        let currentQuestion = null; // Stores the current question object
+        let questions = []; // Array to hold questions for the current game mode
+        let currentQuestionIndex = 0; // Tracks the current question in multiplayer games
+
+
+        const originalQuestions = [
+            { q: "What is the output of: cout << 2 + 2;", a: "4" },
+            { q: "Which keyword is used for constant?", a: "const" },
+            { q: "How many bytes is an int?", a: "4" },
+            { q: "C++ pointer access operator?", a: "->", isFillInBlank: true },
+            { q: "Declare a pointer to int", a: "int* ptr;", isFillInBlank: true }
+        ];
+
+        const fillInBlanksQuestions = [
+            { q: "int main() { cout << \"Hello, ___\"; return 0; }", a: "world", hint: "Common greeting" },
+            { q: "int ___ = 10;", a: "x", hint: "A common variable name" },
+            { q: "for (int i = 0; i < ___; i++)", a: "10", hint: "A typical loop limit" },
+            { q: "class MyClass { public: MyClass() { /* constructor */ } };", a: "MyClass", hint: "Name of the class" },
+            { q: "std::string ___ = \"C++\";", a: "language", hint: "What is C++?" }
+        ];
+
+        const soloChallenges = [
+            {
+                stage: 1,
+                title: "Hello World!",
+                problem: "Write a C++ program that prints 'Hello, World!' to the console. The output must exactly match 'Hello, World!' followed by a newline.",
+                expectedOutput: "Hello, World!\n",
+                initialCode: `#include <iostream>\n\nint main() {\n  std::cout << "Hello, World!" << std::endl;\n  return 0;\n}`
+            },
+            {
+                stage: 2,
+                title: "Add Two Numbers",
+                problem: "Write a C++ program that declares two integer variables, `a` and `b`, initializes them to 5 and 7 respectively, and prints their sum to the console. The output must be exactly '12' followed by a newline.",
+                expectedOutput: "12\n",
+                initialCode: `#include <iostream>\n\nint main() {\n  int a = 5;\n  int b = 7;\n  std::cout << (a + b) << std::endl;\n  return 0;\n}`
+            },
+            {
+                stage: 3,
+                title: "Conditional Statement (If-Else)",
+                problem: "Write a C++ program that declares an integer variable `num` and initializes it to 10. If `num` is greater than 5, print 'Greater than 5'; otherwise, print 'Not greater than 5'. The output must be exactly 'Greater than 5' followed by a newline.",
+                expectedOutput: "Greater than 5\n",
+                initialCode: `#include <iostream>\n\nint main() {\n  int num = 10;\n  if (num > 5) {\n    std::cout << "Greater than 5" << std::endl;\n  } else {\n    std::cout << "Not greater than 5" << std::endl;\n  }\n  return 0;\n}`
+            },
+            {
+                stage: 4,
+                title: "Simple Loop (For loop)",
+                problem: "Write a C++ program that uses a for loop to print numbers from 1 to 3, each on a new line. The output must be exactly '1\\n2\\n3\\n'.",
+                expectedOutput: "1\n2\n3\n",
+                initialCode: `#include <iostream>\n\nint main() {\n  for (int i = 1; i <= 3; ++i) {\n    std::cout << i << std::endl;\n  }\n  return 0;\n}`
+            },
+            {
+                stage: 5,
+                title: "Basic Function",
+                problem: "Write a C++ program with a function named `add` that takes two integers as parameters and returns their sum. In `main`, call `add` with 15 and 20 and print the result. The output must be exactly '35' followed by a newline.",
+                expectedOutput: "35\n",
+                initialCode: `#include <iostream>\n\nint add(int a, int b) {\n  return a + b;\n}\n\nint main() {\n  std::cout << add(15, 20) << std::endl;\n  return 0;\n}`
+            },
+            {
+                stage: 6,
+                title: "Factorial Calculation",
+                problem: "Write a C++ program to calculate the factorial of a number (e.g., 5). Print the result. The output must be exactly '120' followed by a newline. (Factorial of 5 is 5*4*3*2*1 = 120)",
+                expectedOutput: "120\n",
+                initialCode: `#include <iostream>\n\nint main() {\n  int n = 5;\n  long long factorial = 1;\n\n  for (int i = 1; i <= n; ++i) {\n    factorial *= i;\n  }\n\n  std::cout << factorial << std::endl;\n  return 0;\n}`
+            },
+            {
+                stage: 7,
+                title: "Array Sum",
+                problem: "Write a C++ program that initializes an integer array with values {10, 20, 30}. Calculate the sum of its elements and print the sum. The output must be exactly '60' followed by a newline.",
+                expectedOutput: "60\n",
+                initialCode: `#include <iostream>\n#include <vector>\n\nint main() {\n  std::vector<int> numbers = {10, 20, 30};\n  int sum = 0;\n\n  for (int num : numbers) {\n    sum += num;\n  }\n\n  std::cout << sum << std::endl;\n  return 0;\n}`
+            }
+        ];
+
+        let currentSoloStage = 0; // This will be loaded from currentUser.soloStage
+
+        let gameTimerInterval = null; // Timer for multiplayer games
+        let timeLeft = 30; // Initial time for multiplayer questions
+
+        // --- DOM Elements Cache ---
+        const authContainer = document.getElementById('authContainer');
+        const gameModeSelection = document.getElementById('gameModeSelection');
+        const mainContentWrapper = document.querySelector('.main-content-wrapper');
+        const gameUI = document.getElementById('gameUI');
+        const soloChallengeUI = document.getElementById('soloChallengeUI');
+        const chatBox = document.getElementById('chatBox');
+
+        const logoutBtn = document.getElementById('logoutBtn');
+        const welcomeMessage = document.getElementById('welcomeMessage');
+
+        const usernameInput = document.getElementById('usernameInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const authTitle = document.getElementById('authTitle');
+        const authSubmitBtn = document.getElementById('authSubmitBtn');
+        const authSwitch = document.getElementById('authSwitch');
+
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const customModal = document.getElementById('customModal');
+
+        const soloProblemDescription = document.getElementById('soloProblemDescription');
+        const soloCodeEditor = document.getElementById('soloCodeEditor');
+        const soloCurrentStageSpan = document.getElementById('soloCurrentStage');
+        const soloPrevStageBtn = document.getElementById('soloPrevStageBtn');
+        const soloNextStageBtn = document.getElementById('soloNextStageBtn');
+        const soloResult = document.getElementById('soloResult');
+        const soloLoadingIndicator = document.getElementById('soloLoadingIndicator');
+        const runCodeBtn = document.getElementById('runCodeBtn');
+
+        const chatMessagesDiv = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendChatBtn = document.getElementById('sendChatBtn');
+
+        const gameQuestionDisplay = document.getElementById('question');
+        const gameTimerSpan = document.getElementById('timer');
+        const gameAnswerInput = document.getElementById('answerInput');
+        const gameSubmitAnswerBtn = document.getElementById('submitAnswerBtn');
+        const gameNextQuestionBtn = document.getElementById('nextQuestionBtn');
+        const gameReplayButton = document.getElementById('replayButton');
+        const playerCircleDiv = document.getElementById('playerCircle');
+        const globalLeaderboardBody = document.getElementById('globalLeaderboardBody');
+
+        // New event listener elements (buttons that had inline onclicks)
+        const soloCodingChallengeBtn = document.getElementById('soloCodingChallengeBtn');
+        const multiplayer4v4Btn = document.getElementById('multiplayer4v4Btn');
+        const multiplayer1v1Btn = document.getElementById('multiplayer1v1Btn');
+        const backToLobbyBtnGameUI = document.getElementById('backToLobbyBtnGameUI');
+        const backToLobbyBtnSoloUI = document.getElementById('backToLobbyBtnSoloUI');
+
+
+        // --- Utility Functions for UI State Management ---
+
+        /**
+         * Shows a specific section and hides others. Manages main-content-wrapper and chatbox visibility.
+         * @param {HTMLElement} sectionElement The section DOM element to show.
+         */
+        function showSection(sectionElement) {
+            const sections = [authContainer, gameModeSelection, gameUI, soloChallengeUI];
+            sections.forEach(sec => {
+                if (sec) {
+                    sec.classList.add('hidden');
+                }
+            });
+            if (sectionElement) {
+                sectionElement.classList.remove('hidden');
+            }
+
+            // Adjust main-content-wrapper display based on the active section
+            if (sectionElement === gameModeSelection || sectionElement === gameUI || sectionElement === soloChallengeUI) {
+                mainContentWrapper.style.display = 'flex';
+            } else {
+                mainContentWrapper.style.display = 'block'; // Or 'flex' if auth is also flex-centered
+            }
+
+            // Chat box is only shown for lobby/multiplayer modes
+            if (sectionElement === gameModeSelection || sectionElement === gameUI) {
+                chatBox.classList.remove('hidden');
+            } else {
+                chatBox.classList.add('hidden');
+            }
+        }
+
+        function showCustomModal(title, message) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            customModal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            customModal.style.display = 'none';
+        }
+
+        function setLoading(element, isLoading, text = '') {
+            if (isLoading) {
+                element.classList.remove('hidden');
+                if (text) element.textContent = text;
+            } else {
+                element.classList.add('hidden');
+                if (text) element.textContent = '';
+            }
+        }
+
+        // --- Authentication Logic ---
+        let isLoginMode = true; // State for auth form (login or signup)
+
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            authTitle.textContent = isLoginMode ? 'Login' : 'Sign Up';
+            authSubmitBtn.textContent = isLoginMode ? 'Login' : 'Sign Up';
+            authSwitch.textContent = isLoginMode ? "Don't have an account? Sign Up" : "Already have an account? Login";
+            usernameInput.value = '';
+            passwordInput.value = '';
+        }
+
+        async function handleAuth() {
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (!username || !password) {
+                showCustomModal('Error', 'Please enter both username and password.');
+                return;
+            }
+
+            const endpoint = isLoginMode ? '/api/login' : '/api/signup';
+            try {
+                const response = await fetch(`${BACKEND_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    if (isLoginMode) {
+                        // Successful login
+                        currentUser = data.user;
+                        jwtToken = data.token;
+                        localStorage.setItem('jwtToken', jwtToken); // Store JWT
+                        showCustomModal('Success', data.message);
+                        updateUIForLoggedInUser();
+                        // Authenticate socket after successful login
+                        socket.emit('authenticate_socket', jwtToken);
+                    } else {
+                        // Successful signup
+                        showCustomModal('Success', data.message + ' You can now log in.');
+                        toggleAuthMode(); // Switch to login mode after signup
+                    }
+                } else {
+                    // Error from backend
+                    showCustomModal('Error', data.message || 'An unknown error occurred.');
+                }
+            } catch (error) {
+                console.error('Auth fetch error:', error);
+                showCustomModal('Network Error', 'Could not connect to the server. Please try again.');
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            jwtToken = null;
+            localStorage.removeItem('jwtToken');
+            welcomeMessage.style.display = 'none';
+            logoutBtn.style.display = 'none';
+            showSection(authContainer); // Go back to auth screen
+            socket.disconnect(); // Disconnect socket
+            socket.connect(); // Reconnect socket to get a fresh, unauthenticated connection
+            // Clear any game-specific UI elements or timers
+            clearInterval(gameTimerInterval);
+            gameTimerInterval = null;
+            gameQuestionDisplay.textContent = '';
+            gameAnswerInput.value = '';
+            playerCircleDiv.innerHTML = '';
+            soloCodeEditor.value = '';
+            soloResult.textContent = '';
+        }
+
+        function updateUIForLoggedInUser() {
+            if (currentUser) {
+                welcomeMessage.textContent = `Welcome, ${currentUser.username}! ELO: ${currentUser.elo}`;
+                welcomeMessage.style.display = 'inline';
+                logoutBtn.style.display = 'inline';
+                showSection(gameModeSelection); // Show game mode selection after login
+                updateGlobalLeaderboard(); // Request global leaderboard on login
+            }
+        }
+
+        // --- Global Leaderboard ---
+        function updateGlobalLeaderboard(leaderboardData) {
+            globalLeaderboardBody.innerHTML = '';
+            if (leaderboardData && leaderboardData.length > 0) {
+                leaderboardData.forEach((player, index) => {
+                    const row = globalLeaderboardBody.insertRow();
+                    const rankCell = row.insertCell(0);
+                    const usernameCell = row.insertCell(1);
+                    const eloCell = row.insertCell(2);
+
+                    rankCell.textContent = index + 1;
+                    usernameCell.textContent = player.username;
+                    eloCell.textContent = player.elo;
+                });
+            } else {
+                const row = globalLeaderboardBody.insertRow();
+                const cell = row.insertCell(0);
+                cell.colSpan = 3;
+                cell.textContent = 'No leaderboard data available.';
+                cell.style.textAlign = 'center';
+            }
+        }
+
+        // --- Game Mode Selection ---
+        function selectGameMode(mode) {
+            currentGameMode = mode;
+            if (mode === 'solo-coding-challenge') {
+                showSection(soloChallengeUI);
+                // Load the current solo stage for the user
+                currentSoloStage = currentUser.soloStage || 0; // Use saved stage, or 0 if new
+                loadSoloChallenge(currentSoloStage);
+            } else {
+                showSection(gameUI);
+                initSimulatedGame(mode);
+                socket.emit('join_game_lobby', mode); // Let backend know player is looking for game
+            }
+        }
+
+        function backToLobby() {
+            showSection(gameModeSelection);
+            clearInterval(gameTimerInterval);
+            gameTimerInterval = null;
+            gameQuestionDisplay.textContent = '';
+            gameAnswerInput.value = '';
+            gameSubmitAnswerBtn.classList.remove('hidden');
+            gameNextQuestionBtn.classList.add('hidden');
+            gameReplayButton.classList.add('hidden');
+            playerCircleDiv.innerHTML = ''; // Clear players
+            gameAnswerInput.disabled = false; // Enable input
+            updateGlobalLeaderboard(); // Refresh leaderboard on returning to lobby
+        }
+
+
+        // --- Simulated Multiplayer Game Logic (4v4 Q&A / 1v1 Fill-in-the-Blanks) ---
+
+        function initSimulatedGame(mode) {
+            currentQuestionIndex = 0;
+            players = []; // Reset players for new game
+            gameAnswerInput.value = '';
+            gameAnswerInput.disabled = false;
+            gameSubmitAnswerBtn.classList.remove('hidden');
+            gameNextQuestionBtn.classList.add('hidden');
+            gameReplayButton.classList.add('hidden');
+            gameTimerSpan.textContent = '30';
+
+            let questionsToUse;
+            if (mode === '4v4-qna') {
+                // Shuffle questions for variety each game
+                questionsToUse = [...originalQuestions].sort(() => Math.random() - 0.5);
+            } else if (mode === '1v1-fill-in-blanks') {
+                questionsToUse = [...fillInBlanksQuestions].sort(() => Math.random() - 0.5);
+            }
+            questions = questionsToUse;
+
+            // Simulate initial players for the game (e.g., current user + 3 bots for 4v4)
+            // In a real game, 'players' would come from server matchmaking
+            players.push({ username: currentUser.username, elo: currentUser.elo, lives: 3, isActive: true });
+            // Add some simulated bots
+            for (let i = 1; i <= (mode === '4v4-qna' ? 3 : 1); i++) {
+                players.push({ username: `Bot${i}`, elo: 1000 + Math.floor(Math.random() * 200) - 100, lives: 3, isActive: false });
+            }
+            renderPlayers();
+            startRound();
+        }
+
+        function startRound() {
+            if (currentQuestionIndex < questions.length) {
+                currentQuestion = questions[currentQuestionIndex];
+                gameQuestionDisplay.textContent = currentQuestion.q;
+                gameAnswerInput.value = '';
+                gameAnswerInput.disabled = false;
+                gameSubmitAnswerBtn.classList.remove('hidden');
+                gameNextQuestionBtn.classList.add('hidden');
+
+                timeLeft = 30;
+                gameTimerSpan.textContent = timeLeft;
+                clearInterval(gameTimerInterval);
+                gameTimerInterval = setInterval(gameCountdown, 1000);
+
+                // Simulate active player (for visual effect, real games manage turns server-side)
+                players.forEach(p => p.isActive = (p.username === currentUser.username)); // Only current user is "active"
+                renderPlayers();
+            } else {
+                endGame();
+            }
+        }
+
+        function gameCountdown() {
+            timeLeft--;
+            gameTimerSpan.textContent = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(gameTimerInterval);
+                showCustomModal('Time Up!', 'You ran out of time for this question.');
+                // Optionally, penalize player or move to next question automatically
+                gameAnswerInput.disabled = true;
+                gameSubmitAnswerBtn.classList.add('hidden');
+                gameNextQuestionBtn.classList.remove('hidden');
+            }
+        }
+
+        function submitAnswer() {
+            clearInterval(gameTimerInterval);
+            const userAnswer = gameAnswerInput.value.trim();
+            gameAnswerInput.disabled = true;
+            gameSubmitAnswerBtn.classList.add('hidden');
+            gameNextQuestionBtn.classList.remove('hidden');
+
+            if (!currentUser) {
+                showCustomModal('Error', 'You must be logged in to submit an answer.');
+                return;
+            }
+
+            // Emit the answer to the backend
+            socket.emit('submit_answer', {
+                answer: userAnswer,
+                questionIndex: currentQuestionIndex,
+                gameMode: currentGameMode
+            });
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                startRound();
+            } else {
+                endGame();
+            }
+        }
+
+        function endGame() {
+            clearInterval(gameTimerInterval);
+            showCustomModal('Game Over!', 'All questions completed. Check leaderboard for results!');
+            gameReplayButton.classList.remove('hidden');
+            gameSubmitAnswerBtn.classList.add('hidden');
+            gameNextQuestionBtn.classList.add('hidden');
+            gameQuestionDisplay.textContent = 'Game Over!';
+        }
+
+        function replayGame() {
+            initSimulatedGame(currentGameMode);
+        }
+
+        function renderPlayers() {
+            playerCircleDiv.innerHTML = ''; // Clear existing players
+            const numPlayers = players.length;
+            const radius = 150; // Radius for player placement circle
+
+            players.forEach((player, index) => {
+                const angle = (index / numPlayers) * 2 * Math.PI;
+                const x = radius * Math.cos(angle);
+                const y = radius * Math.sin(angle);
+
+                const playerDiv = document.createElement('div');
+                playerDiv.className = 'player';
+                playerDiv.style.left = `calc(50% + ${x}px - 50px)`; // 50px is half of playerDiv.width
+                playerDiv.style.top = `calc(50% + ${y}px - 50px)`;  // 50px is half of playerDiv.height
+
+                if (player.isActive) {
+                    playerDiv.classList.add('active');
+                }
+
+                playerDiv.innerHTML = `
+                    <span class="name">${player.username}</span>
+                    <span class="lives">Lives: ${player.lives}</span>
+                    <span class="elo">ELO: ${player.elo}</span>
+                `;
+                playerCircleDiv.appendChild(playerDiv);
+            });
+        }
+
+
+        // --- Solo Challenge Logic ---
+
+        function loadSoloChallenge(stage) {
+            const challenge = soloChallenges[stage];
+            if (challenge) {
+                currentSoloStage = stage;
+                soloCurrentStageSpan.textContent = challenge.stage;
+                soloProblemDescription.textContent = challenge.problem;
+                soloCodeEditor.value = challenge.initialCode;
+                soloResult.textContent = 'Awaiting code run...';
+                soloPrevStageBtn.disabled = (currentSoloStage === 0);
+                soloNextStageBtn.disabled = (currentSoloStage >= soloChallenges.length - 1);
+                runCodeBtn.disabled = false;
+            } else {
+                // If no more challenges, disable next and show completion message
+                soloCurrentStageSpan.textContent = 'Complete!';
+                soloProblemDescription.textContent = 'Congratulations! You have completed all solo coding challenges.';
+                soloCodeEditor.value = '';
+                soloCodeEditor.disabled = true;
+                soloPrevStageBtn.disabled = false; // Can still go back
+                soloNextStageBtn.disabled = true;
+                runCodeBtn.disabled = true;
+                soloResult.textContent = 'All challenges completed.';
+            }
+        }
+
+        function previousSoloStage() {
+            if (currentSoloStage > 0) {
+                loadSoloChallenge(currentSoloStage - 1);
+            }
+        }
+
+        function nextSoloStage() {
+            if (currentSoloStage < soloChallenges.length - 1) {
+                loadSoloChallenge(currentSoloStage + 1);
+            }
+        }
+
+        async function submitSoloCode() {
+            const currentChallenge = soloChallenges[currentSoloStage];
+            if (!currentChallenge) {
+                showCustomModal('Error', 'No solo challenge loaded.');
+                return;
+            }
+            if (!currentUser || !jwtToken) {
+                showCustomModal('Error', 'You must be logged in to submit code.');
+                return;
+            }
+
+            const code = soloCodeEditor.value;
+            soloResult.textContent = ''; // Clear previous result
+            setLoading(soloLoadingIndicator, true);
+            runCodeBtn.disabled = true; // Disable button while running
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/gemini-proxy`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${jwtToken}` // Include JWT
+                    },
+                    body: JSON.stringify({
+                        prompt: currentChallenge.problem,
+                        currentCode: code,
+                        expectedOutput: currentChallenge.expectedOutput
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    soloResult.textContent = data.evaluation;
+                    if (data.evaluation.startsWith('Correct!')) {
+                        // Advance solo stage if solved and it's a new high stage for the user
+                        if (currentUser.soloStage === currentSoloStage) {
+                            currentUser.soloStage++; // Increment local user stage
+                            showCustomModal('Success', 'Challenge solved! Moving to the next stage.');
+                            // Update soloStage on the backend
+                            await updateUserDataBackend({ soloStage: currentUser.soloStage });
+                            loadSoloChallenge(currentUser.soloStage); // Load next stage
+                        } else {
+                            showCustomModal('Success', 'Challenge solved! (You already completed this stage before.)');
+                        }
+                    } else {
+                        // Incorrect, just show message
+                        showCustomModal('Try Again', 'Your code is incorrect. See evaluation for hints.');
+                    }
+                } else {
+                    soloResult.textContent = `Error: ${data.message || 'Unknown error from AI evaluation.'}`;
+                    showCustomModal('AI Error', data.message || 'Failed to get AI evaluation.');
+                }
+            } catch (error) {
+                console.error('Error submitting solo code:', error);
+                soloResult.textContent = `Network error: ${error.message}`;
+                showCustomModal('Network Error', 'Could not reach the evaluation server. Check console for details.');
+            } finally {
+                setLoading(soloLoadingIndicator, false);
+                runCodeBtn.disabled = false; // Re-enable button
+            }
+        }
+
+        // Function to update user data on the backend (e.g., soloStage, ELO)
+        async function updateUserDataBackend(dataToUpdate) {
+            if (!jwtToken || !currentUser) {
+                console.error("Not logged in to update user data.");
+                return;
+            }
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/update-user-data`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${jwtToken}`
+                    },
+                    body: JSON.stringify({
+                        username: currentUser.username, // Send username for identification (server will verify against token)
+                        ...dataToUpdate
+                    })
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('Failed to update user data on backend:', errorData.message);
+                    // Optionally show a modal to the user
+                    // showCustomModal('Data Sync Error', 'Failed to save your progress. Please try again.');
+                } else {
+                    const updatedUser = await response.json();
+                    currentUser.soloStage = updatedUser.user.soloStage; // Ensure local user object is updated
+                    currentUser.elo = updatedUser.user.elo;
+                    welcomeMessage.textContent = `Welcome, ${currentUser.username}! ELO: ${currentUser.elo}`; // Refresh header
+                    console.log('User data updated successfully on backend.');
+                    socket.emit('request_global_leaderboard'); // Request fresh leaderboard after local ELO changes
+                }
+            } catch (error) {
+                console.error('Network error updating user data:', error);
+            }
+        }
+
+
+        // --- Chat Logic ---
+        sendChatBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Event Listeners for new buttons (previously had inline onclicks)
+        soloCodingChallengeBtn.addEventListener('click', () => selectGameMode('solo-coding-challenge'));
+        multiplayer4v4Btn.addEventListener('click', () => selectGameMode('4v4-qna'));
+        multiplayer1v1Btn.addEventListener('click', () => selectGameMode('1v1-fill-in-blanks'));
+        backToLobbyBtnGameUI.addEventListener('click', backToLobby);
+        backToLobbyBtnSoloUI.addEventListener('click', backToLobby);
+
+
+        gameSubmitAnswerBtn.addEventListener('click', submitAnswer);
+        gameNextQuestionBtn.addEventListener('click', nextQuestion);
+        gameReplayButton.addEventListener('click', replayGame);
+        runCodeBtn.addEventListener('click', submitSoloCode);
+        soloPrevStageBtn.addEventListener('click', previousSoloStage);
+        soloNextStageBtn.addEventListener('click', nextSoloStage);
+        logoutBtn.addEventListener('click', logout);
+        authSubmitBtn.addEventListener('click', handleAuth);
+        authSwitch.addEventListener('click', toggleAuthMode);
+
+
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (message) {
+                socket.emit('chat_message', { message: message });
+                chatInput.value = '';
+            }
+        }
+
+        function appendChatMessage(messageObj) {
+            const msgDiv = document.createElement('div');
+            msgDiv.textContent = `${messageObj.sender}: ${messageObj.message}`;
+            if (messageObj.sender === 'SERVER') {
+                msgDiv.classList.add('chat-message-server');
+            } else if (currentUser && messageObj.sender === currentUser.username) {
+                msgDiv.classList.add('chat-message-self');
+            } else {
+                msgDiv.classList.add('chat-message-user');
+            }
+            chatMessagesDiv.appendChild(msgDiv);
+            chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; // Auto-scroll to bottom
+        }
+
+        // --- Socket.IO Event Listeners ---
+        socket.on('connect', () => {
+            console.log('Connected to server via Socket.IO');
+            if (jwtToken) {
+                // Re-authenticate socket if a token exists in local storage
+                socket.emit('authenticate_socket', jwtToken);
+            } else {
+                // If no token, show auth container by default
+                showSection(authContainer);
+            }
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnected from server');
+            // Optionally inform user, but typically handled by automatic reconnect
+        });
+
+        socket.on('auth_error', (message) => {
+            console.error('Socket authentication error:', message);
+            showCustomModal('Authentication Error', message + ' Please log in again.');
+            logout(); // Force logout on auth error
+        });
+
+        socket.on('user_data_sync', (data) => {
+            // This event confirms user data from the server, useful after socket authentication
+            currentUser = data;
+            updateUIForLoggedInUser();
+            console.log('User data synced:', currentUser);
+        });
+
+        socket.on('chat_history', (history) => {
+            chatMessagesDiv.innerHTML = ''; // Clear existing messages
+            history.forEach(appendChatMessage);
+        });
+
+        socket.on('chat_message', (msg) => {
+            appendChatMessage(msg);
+        });
+
+        socket.on('global_leaderboard_update', (leaderboard) => {
+            console.log('Global Leaderboard Updated:', leaderboard);
+            updateGlobalLeaderboard(leaderboard);
+        });
+
+        socket.on('game_starting', (data) => {
+            console.log('Game Starting:', data.message);
+            // showCustomModal('Game Starting', data.message); // Could use a temporary game-specific message
+        });
+
+        socket.on('game_state_update', (data) => {
+            console.log('Game State Update:', data);
+            if (data.type === 'player_list_update') {
+                players = data.players;
+                renderPlayers();
+            } else if (data.type === 'answer_feedback') {
+                const playerIndex = players.findIndex(p => p.username === data.username);
+                if (playerIndex !== -1) {
+                    if (!data.isCorrect) {
+                        players[playerIndex].lives = Math.max(0, players[playerIndex].lives - 1); // Deduct life if incorrect
+                    }
+                    players[playerIndex].elo = data.elo; // Update ELO
+                    renderPlayers(); // Re-render players to show updated lives/ELO
+
+                    // Provide immediate feedback for the user who submitted
+                    if (data.username === currentUser.username) {
+                        showCustomModal(data.isCorrect ? 'Correct!' : 'Incorrect!', data.feedback);
+                    }
+                }
+            }
+            // You'd add more logic here for turn changes, score updates, etc.
+        });
+
+
+        // Initial check when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            if (jwtToken) {
+                // If a token exists, try to re-authenticate and show lobby/game modes
+                // The `socket.on('connect')` handler will trigger `authenticate_socket`.
+                // Meanwhile, keep auth section hidden until authenticated.
+                authContainer.classList.add('hidden');
+                mainContentWrapper.style.display = 'block'; // Or flex, depending on initial layout choice
+                chatBox.classList.add('hidden'); // Chat hidden until authentication confirms user for lobby
+                welcomeMessage.style.display = 'none'; // Hide welcome message until user data is loaded
+                logoutBtn.style.display = 'none'; // Hide logout button until user is confirmed
+            } else {
+                // No token, show login/signup
+                showSection(authContainer);
+            }
+            // Initial request for leaderboard (in case socket auth is slow)
+            socket.emit('request_global_leaderboard');
+        });
+    </script>
+</body>
+</html>
